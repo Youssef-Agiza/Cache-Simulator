@@ -4,8 +4,7 @@
 #define SET_ASSOCIATIVE_CACHE_H
 
 // #include "Set.h"
-#include "common.h"
-#define CACHE_SIZE (64 * 1024)
+#include "PCH.h"
 enum cacheResType
 {
     MISS = 0,
@@ -28,7 +27,7 @@ public:
 private:
     bool IsInSet(unsigned int address);
     void InitalizeSets(unsigned int lineSize);
-    void ReplaceBlock(unsigned int address);
+    void UpdateSet(unsigned int address);
 
     struct Set
     {
@@ -41,7 +40,7 @@ private:
     unsigned int m_NumberOfWays;
     unsigned int m_LineSize;
     unsigned int m_NumberOfSets;
-    unsigned int m_NumOfTagBits;
+    unsigned int m_NumberOfTagBits;
 };
 
 #endif

@@ -4,20 +4,23 @@ SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays, unsigned int
     : m_NumberOfWays(numberOfWays), m_LineSize(lineSize)
 {
     m_NumberOfSets = (unsigned int)(CACHE_SIZE) / (m_LineSize * m_NumberOfWays);
-    m_NumOfTagBits = 32 - (unsigned int)(log2(m_LineSize) + log2(m_NumberOfSets)); // 32 bit address - the number of bits we have for the words
+    // 32 bit address - the number of bits we have for the words
+    m_NumberOfTagBits = 32 - (unsigned int)(log2(m_LineSize) + log2(m_NumberOfSets)); 
     InitalizeSets(m_LineSize);
 }
 
 SetAssociativeCache::~SetAssociativeCache()
 {
+    //Deleting used memory
     delete[] m_Sets;
 }
 
 bool SetAssociativeCache::IsInSet(unsigned int address)
 {
     unsigned int setIndex = address % m_NumberOfWays;
-    typename SetAssociativeCache::Set &set = m_Sets[setIndex];
-    unsigned int tag = address >> (unsigned int)(log2(m_LineSize) + log2(m_NumberOfSets));
+    // Referecne variable to ease the use of the array
+    Set &set = m_Sets[setIndex];
+    unsigned int tag = address >> (32 - m_NumberOfTagBits);
 
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (set.validBits[i] == VALID && set.tags[i] == tag)
@@ -29,20 +32,20 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
 cacheResType SetAssociativeCache::TestCache(unsigned int address)
 {
     unsigned int setNumber = address % m_NumberOfWays;
-    // if (m_Sets[setNumber].IsInSet(address))
-    // return HIT;
-    // else
+    if (IsInSet(address))
+        return HIT;
+    else
     {
-        // m_Sets[setNumber].ReplaceLine(address);
+        UpdateSet(address);
         return MISS;
     }
 }
 
-void SetAssociativeCache::ReplaceBlock(unsigned int address)
+void SetAssociativeCache::UpdateSet(unsigned int address)
 {
     unsigned int setIndex = address % m_NumberOfWays;
-    unsigned int tag = address >> (32 - m_NumOfTagBits);
-    typename SetAssociativeCache::Set &set = m_Sets[setIndex];
+    unsigned int tag = address >> (32 - m_NumberOfTagBits);
+    Set &set = m_Sets[setIndex];
 
     set.tags[set.nextReplacementIndex] = tag;
     set.validBits[set.nextReplacementIndex] = VALID;
@@ -51,8 +54,7 @@ void SetAssociativeCache::ReplaceBlock(unsigned int address)
 
 void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
 {
-
-    m_Sets = new typename SetAssociativeCache::Set[m_NumberOfSets];
+    m_Sets = new Set[m_NumberOfSets];
 
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
     {
