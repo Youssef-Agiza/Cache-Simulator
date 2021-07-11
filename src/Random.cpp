@@ -12,6 +12,7 @@ unsigned int Random::rand_()
 unsigned int Random::memGenA()
 {
     static unsigned int address = 0;
+    std::cout << "address of memGenA" << address << std::endl; 
     return (address++) % (DRAM_SIZE);
 }
 unsigned int Random::memGenB()

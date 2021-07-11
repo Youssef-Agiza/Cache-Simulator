@@ -19,7 +19,7 @@ enum Validity
 class SetAssociativeCache
 {
 public:
-    SetAssociativeCache(unsigned int numberOfWays, unsigned int blockSize);
+    SetAssociativeCache(unsigned int numberOfWays, unsigned int lineSize);
     ~SetAssociativeCache();
     cacheResType TestCache(unsigned int address);
 
