@@ -5,7 +5,7 @@ SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays, unsigned int
 {
     m_NumberOfSets = (unsigned int)(CACHE_SIZE) / (m_LineSize * m_NumberOfWays);
     // 32 bit address - the number of bits we have for the words
-    m_NumberOfTagBits = 32 - (unsigned int)(log2(m_LineSize) + log2(m_NumberOfSets)); 
+    m_NumberOfTagBits = 32 - (unsigned int)(log2(m_LineSize) + log2(m_NumberOfSets));
     InitalizeSets(m_LineSize);
 }
 
@@ -18,14 +18,14 @@ SetAssociativeCache::~SetAssociativeCache()
 bool SetAssociativeCache::IsInSet(unsigned int address)
 {
     unsigned int setIndex = (address << m_NumberOfTagBits) >> (m_NumberOfTagBits + (unsigned int)(log2(m_LineSize)));
+
     // Referecne variable to ease the use of the array
     Set &set = m_Sets[setIndex];
     unsigned int tag = address >> (32 - m_NumberOfTagBits);
-
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
-        if (set.validBits[i] == VALID && set.tags[i] == tag)
+        if (set.validBits[i] == VALID && set.tags[i] == tag){
             return true;
-            
+        }
     return false;
 }
 
@@ -33,21 +33,20 @@ cacheResType SetAssociativeCache::TestCache(unsigned int address)
 {
     if (IsInSet(address))
         return HIT;
-
+    
     UpdateSet(address);
     return MISS;
 }
 
 void SetAssociativeCache::UpdateSet(unsigned int address)
 {
-    //unsigned int setIndex = address % m_NumberOfWays;
     unsigned int setIndex = (address << m_NumberOfTagBits) >> (m_NumberOfTagBits + (unsigned int)(log2(m_LineSize)));
     unsigned int tag = address >> (32 - m_NumberOfTagBits);
     Set &set = m_Sets[setIndex];
 
     set.tags[set.nextReplacementIndex] = tag;
     set.validBits[set.nextReplacementIndex] = VALID;
-    set.nextReplacementIndex = (set.nextReplacementIndex + 1) % m_NumberOfWays;
+    set.nextReplacementIndex = rand() % m_NumberOfWays;
 }
 
 void SetAssociativeCache::InitalizeSets(unsigned int lineSize)

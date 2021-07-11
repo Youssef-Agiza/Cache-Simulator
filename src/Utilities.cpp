@@ -1,6 +1,7 @@
 #include "../headers/Utilities.h"
-#define NO_OF_Iterations 10
-
+#include <climits>
+#include <random>
+#define NO_OF_Iterations 1000000
 void HandleInput()
 {
 std::string answer = "";
@@ -33,11 +34,12 @@ void Exp1()
 	ExecuteExp(32, 1, 1);
 	ExecuteExp(64, 1, 1);
 	ExecuteExp(128, 1, 1);
-
+	std::cout << "\nSaved PHASE1: Outputs/Exp#1 & 1 ways.csv\n";
 	ExecuteExp(16, 8, 1);
 	ExecuteExp(32, 8, 1);
 	ExecuteExp(64, 8, 1);
 	ExecuteExp(128, 8, 1);
+	std::cout << "\nSaved PHASE2: Outputs/Exp#1 & 8 ways.csv\n";
 }
 
 
@@ -49,10 +51,11 @@ void Exp2()
 	ExecuteExp(32, 8, 2);
 	ExecuteExp(32, 16, 2);
 	ExecuteExp(32, 32, 2);
+	std::cout << "\nSaved PHASE1: Outputs/Exp#2 & 32 ways.csv\n";
 }
 
 void ExecuteExp(int lineSize, int ways, int expNumber)
-{
+{	
     SetAssociativeCache* caches [6];
     unsigned int hits[6];
 	double hitRatio[6];
@@ -70,18 +73,10 @@ void ExecuteExp(int lineSize, int ways, int expNumber)
             unsigned int address = GetAddress(j, randGen1, randGen2);
             if(caches[j]->TestCache(address) == HIT){
                 hits[j]++;
-				if(j == 0)
-					std::cout << "HIT: " << hits[j] << std::endl;;
-			}
-			else
-			{
-				if(j == 0)
-					std::cout << "MISS\n";
 			}
         }
-	std::cout << "---------------------\n";
     for (int i = 0; i < 6; i++)
-		hitRatio[i] = (100 * hits[i] / NO_OF_Iterations);
+		hitRatio[i] = (100.0 * (double)(hits[i]) / (double)NO_OF_Iterations);
 
 	saveFiles(hitRatio, lineSize, ways, expNumber);
 	for(uint32_t i = 0; i < 6; i++)
@@ -90,7 +85,7 @@ void ExecuteExp(int lineSize, int ways, int expNumber)
 
 void saveFiles(double hitRatio[], int lineSize, int ways, int expNumber)
 {
-	std::ofstream outFile("Exp#"+ std::to_string(expNumber) + " & " + std::to_string(ways) + " ways" +".csv", std::ios::app | std::ios::ate);
+	std::ofstream outFile("Outputs/Exp#"+ std::to_string(expNumber) + " & " + ((expNumber == 1) ? std::to_string(ways) : "32") + " ways" +".csv", std::ios::app | std::ios::ate);
 	int length = outFile.tellp();
 	if(length == 0)
 		outFile << " , A,B,C,D,E,F\n";
@@ -117,6 +112,7 @@ unsigned int GetAddress(int j, Random& randGen1, Random& randGen2)
 		default:
 			error();
     }
+
 	return 0;
 }
 
