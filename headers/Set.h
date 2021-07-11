@@ -15,8 +15,8 @@ public:
 
 private:
     unsigned int numOfTagBits,
-        *setTags,
-        setIndex,
+        *tags,
+        nextReplacementIndex,
         numOfLines,
         numberOfWords;
 
