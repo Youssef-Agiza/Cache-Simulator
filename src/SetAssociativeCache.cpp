@@ -17,7 +17,7 @@ SetAssociativeCache::~SetAssociativeCache()
 
 bool SetAssociativeCache::IsInSet(unsigned int address)
 {
-    unsigned int setIndex = address % m_NumberOfWays;
+    unsigned int setIndex = (address << m_NumberOfTagBits) >> (m_NumberOfTagBits + (unsigned int)(log2(m_LineSize)));
     // Referecne variable to ease the use of the array
     Set &set = m_Sets[setIndex];
     unsigned int tag = address >> (32 - m_NumberOfTagBits);
@@ -25,25 +25,23 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (set.validBits[i] == VALID && set.tags[i] == tag)
             return true;
-
+            
     return false;
 }
 
 cacheResType SetAssociativeCache::TestCache(unsigned int address)
 {
-    unsigned int setNumber = address % m_NumberOfWays;
     if (IsInSet(address))
         return HIT;
-    else
-    {
-        UpdateSet(address);
-        return MISS;
-    }
+
+    UpdateSet(address);
+    return MISS;
 }
 
 void SetAssociativeCache::UpdateSet(unsigned int address)
 {
-    unsigned int setIndex = address % m_NumberOfWays;
+    //unsigned int setIndex = address % m_NumberOfWays;
+    unsigned int setIndex = (address << m_NumberOfTagBits) >> (m_NumberOfTagBits + (unsigned int)(log2(m_LineSize)));
     unsigned int tag = address >> (32 - m_NumberOfTagBits);
     Set &set = m_Sets[setIndex];
 
@@ -56,14 +54,16 @@ void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
 {
     m_Sets = new Set[m_NumberOfSets];
 
-    for (uint32_t i = 0; i < m_NumberOfWays; i++)
+    for (uint32_t i = 0; i < m_NumberOfSets; i++)
     {
         m_Sets[i].nextReplacementIndex = 0;
 
         m_Sets[i].tags = new unsigned int[m_NumberOfWays]; // in words
-        memset(m_Sets[i].tags, 0, m_NumberOfWays);
-
         m_Sets[i].validBits = new unsigned short[m_NumberOfWays]; // in words
-        memset(m_Sets[i].validBits, 0, m_NumberOfWays);           //All are invalid
+        for(int j = 0; j < m_NumberOfWays; j++)
+        {
+            m_Sets[i].tags[j] = 0;
+            m_Sets[i].validBits[j] = 0;
+        }
     }
 }

@@ -1,5 +1,6 @@
 #include "../headers/Utilities.h"
-#define NO_OF_Iterations 10 
+#define NO_OF_Iterations 10
+
 void HandleInput()
 {
 std::string answer = "";
@@ -54,39 +55,51 @@ void ExecuteExp(int lineSize, int ways, int expNumber)
 {
     SetAssociativeCache* caches [6];
     unsigned int hits[6];
-	unsigned int hitRatio[6];
-    memset(hits, 0, 6);
-	memset(hitRatio, 0, 6);
-    for(int i = 0; i < 6; i++)
+	double hitRatio[6];
+    for(uint32_t i = 0; i < 6; i++){
         caches[i] = new SetAssociativeCache(ways, lineSize);
+		hits[i] = 0;
+		hitRatio[i] = 0.0;
+	}
 
     Random randGen1;
     Random randGen2;
-    for(int i = 0; i < NO_OF_Iterations; i++)
-        for(int j = 0; j < 6; j++)
+    for(uint32_t i = 0; i < NO_OF_Iterations; i++)
+        for(uint32_t j = 0; j < 6; j++)
         {
             unsigned int address = GetAddress(j, randGen1, randGen2);
-            if(caches[i]->TestCache(address))
+            if(caches[j]->TestCache(address) == HIT){
                 hits[j]++;
+				if(j == 0)
+					std::cout << "HIT: " << hits[j] << std::endl;;
+			}
+			else
+			{
+				if(j == 0)
+					std::cout << "MISS\n";
+			}
         }
+	std::cout << "---------------------\n";
     for (int i = 0; i < 6; i++)
 		hitRatio[i] = (100 * hits[i] / NO_OF_Iterations);
-	
-	saveFiles(hitRatio, lineSize, ways, expNumber);
 
-	for(uint32_t i=0;i<6;i++)
+	saveFiles(hitRatio, lineSize, ways, expNumber);
+	for(uint32_t i = 0; i < 6; i++)
 		delete caches[i];
 }
 
-void saveFiles(unsigned int  hitRatio[], int lineSize, int ways, int expNumber)
+void saveFiles(double hitRatio[], int lineSize, int ways, int expNumber)
 {
-	std::ofstream outFile("Exp#"+ std::to_string(expNumber) + " & " + std::to_string(ways) + " ways" +".csv");
-	outFile << lineSize << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+	std::ofstream outFile("Exp#"+ std::to_string(expNumber) + " & " + std::to_string(ways) + " ways" +".csv", std::ios::app | std::ios::ate);
+	int length = outFile.tellp();
+	if(length == 0)
+		outFile << " , A,B,C,D,E,F\n";
+	outFile << ((expNumber == 1) ? lineSize : ways) << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+	outFile.close();
 }
 
 unsigned int GetAddress(int j, Random& randGen1, Random& randGen2)
 {
-	std::cout << "Entered GetAddress function" << j << std::endl;
     switch(j)
     {
         case 0:
@@ -109,9 +122,9 @@ unsigned int GetAddress(int j, Random& randGen1, Random& randGen2)
 
 void error(void)
 {
-std::cout << "Exception handled while getting address.\n";
-std::cout << "Exiting program\n";
-exit(0);
+	std::cout << "Exception handled while getting address.\n";
+	std::cout << "Exiting program\n";
+	exit(0);
 }
 
 

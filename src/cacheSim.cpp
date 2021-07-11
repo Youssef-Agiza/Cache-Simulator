@@ -10,6 +10,6 @@ int main()
 {
     HandleInput();
     
-    system("pause");
+    system("PAUSE");
     return 0;
 }
