@@ -51,7 +51,7 @@ there:
 
 int main()
 {
-    //HandleInput();
-    TestBench();
+    HandleInput();
+    //TestBench();
     return 0;
 }
