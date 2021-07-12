@@ -9,13 +9,13 @@ void TestBench()
     ReplacmentPolicy p;
     switch (answer)
     {
-    case 0:
+    case 1:
         p = ReplacmentPolicy::Random;
         break;
-    case 1:
+    case 2:
         p = ReplacmentPolicy::LFU;
         break;
-    case 2:
+    case 3:
         p = ReplacmentPolicy::LRU;
         break;
     }

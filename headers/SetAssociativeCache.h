@@ -45,7 +45,7 @@ private:
         unsigned int *tags;
         unsigned short *validBits;
         unsigned int *frequency;
-        unsigned int *recentlyUsage;
+        unsigned int *leastUsed;
     };
 
     unsigned int m_NumberOfWays;
