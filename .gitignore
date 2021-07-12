@@ -32,3 +32,4 @@
 *.app
 *.csv
 *.stackdump
+*.json
