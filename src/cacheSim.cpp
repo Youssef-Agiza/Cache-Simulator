@@ -6,20 +6,20 @@ void TestBench()
     int answer;
     std::cout << "Replacement policy:\n1-random\n2-LFU\n3-LRU\n";
     std::cin >> answer;
-    ReplacmentPolicy p;
+    ReplacmentPolicy policy;
     switch (answer)
     {
     case 0:
-        p = ReplacmentPolicy::Random;
+        policy = ReplacmentPolicy::Random;
         break;
     case 1:
-        p = ReplacmentPolicy::LFU;
+        policy = ReplacmentPolicy::LFU;
         break;
     case 2:
-        p = ReplacmentPolicy::LRU;
+        policy = ReplacmentPolicy::LRU;
         break;
     }
-    SetAssociativeCache cache(2u, 32u, p);
+    SetAssociativeCache cache(2u, 32u, policy);
     uint32_t addresses[] = {0x070, 0x080, 0x068, 0x190, 0x084, 0x178, 0x08C, 0xF00, 0x064};
     uint32_t arrSize = sizeof(addresses) / sizeof(uint32_t);
     uint32_t hitNumber = 0;

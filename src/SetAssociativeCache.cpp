@@ -1,11 +1,14 @@
 #include "../headers/SetAssociativeCache.h"
 
-SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays, unsigned int lineSize, ReplacmentPolicy policy)
+SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays, unsigned int lineSize, ReplacmentPolicy policy, unsigned int cacheSize)
     : m_NumberOfWays(numberOfWays), m_LineSize(lineSize), m_ReplacmentPolicy(policy)
 {
     m_NumberOfSets = (unsigned int)(CACHE_SIZE) / (m_LineSize * m_NumberOfWays);
     // 32 bit address - the number of bits we have for the words
-    m_NumberOfTagBits = 32 - (unsigned int)(log2(m_LineSize) + log2(m_NumberOfSets));
+    m_NumberOfOffsetBits = (unsigned int)(log2(m_LineSize));
+    m_NumberOfIndexBits = (unsigned int)(log2(m_NumberOfSets));
+    m_NumberOfTagBits = 32 - (m_NumberOfIndexBits + m_NumberOfOffsetBits);
+
     InitalizeSets(m_LineSize);
     std::cout << "Tag bits: " << m_NumberOfTagBits << std::endl;
     std::cout << "Number of Sets: " << m_NumberOfSets << std::endl;
@@ -13,7 +16,15 @@ SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays, unsigned int
 
 SetAssociativeCache::~SetAssociativeCache()
 {
-    //Deleting used memory
+
+    for (uint32_t i = 0; i < m_NumberOfSets; i++)
+    {
+        delete[] m_Sets[i].tags;
+        delete[] m_Sets[i].validBits;
+        delete[] m_Sets[i].recentlyUsage;
+        delete[] m_Sets[i].frequency;
+    }
+
     delete[] m_Sets;
 }
 
@@ -36,30 +47,46 @@ void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
     }
 }
 
+inline unsigned int SetAssociativeCache::getSetIndex(unsigned int address)
+{
+    unsigned int mask = 0xFFFFFFFF >> ((unsigned int)(32 - m_NumberOfIndexBits));
+    std::cout << "Mask: " << mask << " address: " << std::hex << address << "\n";
+
+    return (address >> m_NumberOfOffsetBits) & mask;
+}
+
+inline unsigned int SetAssociativeCache::getTag(unsigned int address)
+{
+    return address >> (m_NumberOfIndexBits + m_NumberOfOffsetBits);
+}
+
 bool SetAssociativeCache::IsInSet(unsigned int address)
 {
-    unsigned int setIndex = (address << m_NumberOfTagBits) >> (m_NumberOfTagBits + (unsigned int)(log2(m_LineSize)));
+    unsigned int setIndex = getSetIndex(address);
+    unsigned int tag = getTag(address);
+
     // Referecne variable to ease the use of the array
     Set &set = m_Sets[setIndex];
-    unsigned int tag = address >> (32 - m_NumberOfTagBits);
+
+    bool found = false;
+
+    //shift to the right with the number of byteoffset + index bits
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (set.validBits[i] == VALID && set.tags[i] == tag)
         {
             set.frequency[i]++;
-            for (int j = 0; j < m_NumberOfWays; j++)
-                if (i != j)
-                    set.recentlyUsage[j]++;
-            return true;
+            found = true;
         }
-    return false;
+        else
+            set.recentlyUsage[i]++;
+
+    return found;
 }
 
 cacheResType SetAssociativeCache::TestCache(unsigned int address)
 {
     if (IsInSet(address))
-    {
         return HIT;
-    }
 
     UpdateSet(address);
     return MISS;
@@ -67,9 +94,11 @@ cacheResType SetAssociativeCache::TestCache(unsigned int address)
 
 void SetAssociativeCache::UpdateSet(unsigned int address)
 {
-    unsigned int setIndex = (address << m_NumberOfTagBits) >> (m_NumberOfTagBits + (unsigned int)(log2(m_LineSize)));
-    unsigned int tag = address >> (32 - m_NumberOfTagBits);
+    unsigned int setIndex = getSetIndex(address);
+    unsigned int tag = getTag(address);
+
     Set &set = m_Sets[setIndex];
+
     uint32_t replacementIndex = FindNextReplacemntIndex(setIndex);
 
     std::cout << "setIndex: " << setIndex << std::endl;
@@ -87,27 +116,24 @@ uint32_t SetAssociativeCache::FindLeastFrequent(uint32_t setNumber)
     Set &currentSet = m_Sets[setNumber];
     uint32_t least = currentSet.frequency[0];
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
-    {
         if (currentSet.frequency[i] < least)
         {
             least = currentSet.frequency[i];
             leastIndex = i;
         }
-    }
     return leastIndex;
 }
-uint32_t SetAssociativeCache::FindLeastRecentlyUsed(uint32_t setNumber)
+uint32_t SetAssociativeCache::FindLeastRecentlyUsed(uint32_t setIndex)
 {
-    uint32_t most = m_Sets[setNumber].recentlyUsage[0];
+    uint32_t most = m_Sets[setIndex].recentlyUsage[0];
     uint32_t index = 0;
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
-    {
-        if (m_Sets[setNumber].recentlyUsage[i] > most)
+        if (m_Sets[setIndex].recentlyUsage[i] > most)
         {
-            most = m_Sets[setNumber].recentlyUsage[i];
+            most = m_Sets[setIndex].recentlyUsage[i];
             index = i;
         }
-    }
+
     return index;
 }
 uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
@@ -123,15 +149,13 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
     case ReplacmentPolicy::LFU:
     {
         replacementIndex = FindLeastFrequent(setNumber);
-        m_Sets[setNumber].frequency[replacementIndex] = 1;
+        m_Sets[setNumber].frequency[replacementIndex] = 0;
         break;
     }
     case ReplacmentPolicy::LRU:
     {
         replacementIndex = FindLeastRecentlyUsed(setNumber);
-        for (int j = 0; j < m_NumberOfWays; j++)
-            if (replacementIndex != j)
-                m_Sets[setNumber].recentlyUsage[j]++;
+        m_Sets[setNumber].recentlyUsage[replacementIndex] = 0;
         break;
     }
     }
