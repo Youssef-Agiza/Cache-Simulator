@@ -26,36 +26,67 @@ enum class ReplacmentPolicy
 class SetAssociativeCache
 {
 public:
-    SetAssociativeCache(unsigned int numberOfWays, unsigned int lineSize, ReplacmentPolicy policy = ReplacmentPolicy::Random, unsigned int cacheSize = CACHE_SIZE);
+    SetAssociativeCache(unsigned int numberOfWays,
+                        unsigned int lineSize,
+                        ReplacmentPolicy policy = ReplacmentPolicy::Random,
+                        unsigned int cacheSize = CACHE_SIZE);
     ~SetAssociativeCache();
     cacheResType TestCache(unsigned int address);
 
 private:
-    bool IsInSet(unsigned int address);
-    void InitalizeSets(unsigned int lineSize);
-    void UpdateSet(unsigned int address);
-
-    inline uint32_t GetTag(uint32_t address);
-    inline uint32_t GetSetIndex(uint32_t address);
-    uint32_t FindLeastFrequent(uint32_t setNumber);
-    uint32_t FindNextReplacemntIndex(uint32_t setNumber);
-    uint32_t FindLeastRecentlyUsed(uint32_t setNumber);
     struct Set
     {
-        unsigned int *tags;
         unsigned short *validBits;
+        unsigned int *tags;
         unsigned int *frequency;
         unsigned int *leastUsed;
     };
 
-    unsigned int m_NumberOfWays;
+    /*returns true if the address if HIT, false if MISS*/
+    bool IsInSet(unsigned int address);
+    void InitalizeSets(unsigned int lineSize);
+
+    /*updates the cache on MISS*/
+    void UpdateSet(unsigned int address);
+
+    /*
+     * Utilities
+     * /
+
+    /* precondition: address is not more than 32 bits
+       postcondition: return the tag in the address*/
+    inline uint32_t GetTag(uint32_t address);
+
+    //precondition: address to be accesssed  is not more than 32 bits
+    //postcondition: return the index of the set to be searched
+    inline uint32_t GetSetIndex(uint32_t address);
+
+    //precondition: cacheSize is given, m_NumberOfWays and m_NumberOfSets are initalized correctly
+    //postcondition: m_NumberOfSets, m_NumberOfTagbits, m_NumberOfOffsetBits, m_NumberOfIndexBits are set
+    void getBits(uint32_t cacheSize);
+
+    /*Replacement Policy helpers*/
+    uint32_t FindLeastFrequent(uint32_t setNumber);
+    uint32_t FindNextReplacemntIndex(uint32_t setNumber);
+    uint32_t FindLeastRecentlyUsed(uint32_t setNumber);
+
+#ifdef _DEBUG
+    /*for debugging*/
+    void LogSetInfo(unsigned int setIndex);
+    void LogCacheInfo();
+    void LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag);
+#endif
+
     unsigned int m_LineSize;
     Set *m_Sets;
     ReplacmentPolicy m_ReplacmentPolicy;
-    unsigned int m_NumberOfSets;
-    unsigned int m_NumberOfTagBits;
-    unsigned int m_NumberOfOffsetBits;
-    unsigned int m_NumberOfIndexBits;
+
+    //number of bits/ways
+    uint32_t m_NumberOfSets;
+    uint32_t m_NumberOfWays;
+    uint32_t m_NumberOfTagBits;
+    uint32_t m_NumberOfIndexBits;
+    uint32_t m_NumberOfOffsetBits;
 };
 
 #endif

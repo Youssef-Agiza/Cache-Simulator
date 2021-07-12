@@ -1,18 +1,26 @@
 #include "../headers/SetAssociativeCache.h"
 
-SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays, unsigned int lineSize, ReplacmentPolicy policy, unsigned int cacheSize)
-    : m_NumberOfWays(numberOfWays), m_LineSize(lineSize), m_ReplacmentPolicy(policy)
+SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays,
+                                         unsigned int lineSize,
+                                         ReplacmentPolicy policy,
+                                         unsigned int cacheSize) : m_NumberOfWays(numberOfWays),
+                                                                   m_LineSize(lineSize),
+                                                                   m_ReplacmentPolicy(policy)
+{
+    getBits(cacheSize);
+    InitalizeSets(m_LineSize);
+
+#ifdef _DEBUG
+    LogCacheInfo();
+#endif
+}
+
+void SetAssociativeCache::getBits(uint32_t cacheSize)
 {
     m_NumberOfSets = (unsigned int)(cacheSize) / (m_LineSize * m_NumberOfWays);
-    // 32 bit address - the number of bits we have for the words
     m_NumberOfOffsetBits = (uint32_t)(log2(m_LineSize));
     m_NumberOfIndexBits = (uint32_t)log2(m_NumberOfSets);
     m_NumberOfTagBits = 32 - (m_NumberOfOffsetBits + m_NumberOfIndexBits);
-    InitalizeSets(m_LineSize);
-#ifdef _DEBUG
-    std::cout << "Tag bits: " << m_NumberOfTagBits << std::endl;
-    std::cout << "Number of Sets: " << m_NumberOfSets << std::endl;
-#endif
 }
 
 SetAssociativeCache::~SetAssociativeCache()
@@ -48,17 +56,14 @@ void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
     }
 }
 
-inline unsigned int SetAssociativeCache::GetSetIndex(unsigned int address)
-{
-    unsigned int mask = 0xFFFFFFFF >> ((unsigned int)(32 - m_NumberOfIndexBits));
-    std::cout << "Mask: " << mask << " address: " << std::hex << address << "\n";
-
-    return (address >> m_NumberOfOffsetBits) & mask;
-}
-
-inline unsigned int SetAssociativeCache::GetTag(unsigned int address)
+inline uint32_t SetAssociativeCache::GetTag(uint32_t address)
 {
     return address >> (m_NumberOfIndexBits + m_NumberOfOffsetBits);
+}
+inline uint32_t SetAssociativeCache::GetSetIndex(uint32_t address)
+{
+    uint32_t mask = 0xFFFFFFFF >> (32 - m_NumberOfIndexBits);
+    return ((address >> m_NumberOfOffsetBits) & mask);
 }
 
 bool SetAssociativeCache::IsInSet(unsigned int address)
@@ -68,19 +73,20 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
 
     // Referecne variable to ease the use of the array
     Set &set = m_Sets[setIndex];
+#ifdef _DEBUG
+    LogSetInfo(setIndex);
+#endif
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (set.validBits[i] == VALID && set.tags[i] == tag)
         {
             set.frequency[i]++;
             for (int j = 0; j < m_NumberOfWays; j++)
-            {
                 if (i != j)
                     set.leastUsed[j]++;
-            }
+
+            set.leastUsed[i] = 0; //reset current access index least used value
             return true;
         }
-        else
-            set.leastUsed[i]++;
 
     return false;
 }
@@ -99,13 +105,13 @@ void SetAssociativeCache::UpdateSet(unsigned int address)
     unsigned int setIndex = GetSetIndex(address);
     unsigned int tag = GetTag(address);
     Set &set = m_Sets[setIndex];
+#ifdef _DEBUG
+    LogSetInfo(setIndex);
+#endif
 
     uint32_t replacementIndex = FindNextReplacemntIndex(setIndex);
 #ifdef _DEBUG
-    std::cout << "setIndex: " << setIndex << std::endl;
-    std::cout << "EXISTING TAG: " << set.tags[replacementIndex] << std::endl;
-    std::cout << "New Tag: " << tag << std::endl;
-    std::cout << "Replacing at way number: " << replacementIndex << std::endl;
+    LogUpdateInfo(setIndex, replacementIndex, tag);
 #endif
     set.tags[replacementIndex] = tag;
     set.validBits[replacementIndex] = VALID;
@@ -135,9 +141,8 @@ uint32_t SetAssociativeCache::FindLeastRecentlyUsed(uint32_t setNumber)
             most = m_Sets[setNumber].leastUsed[i];
             index = i;
         }
-
-        return index;
     }
+    return index;
 }
 uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
 {
@@ -163,19 +168,36 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
             if (replacementIndex != j)
                 m_Sets[setNumber].leastUsed[j]++;
         }
-        m_Sets[setNumber].leastUsed[replacementIndex] = 1;
+        m_Sets[setNumber].leastUsed[replacementIndex] = 0;
         break;
     }
     }
     return replacementIndex;
 }
 
-inline uint32_t SetAssociativeCache::GetTag(uint32_t address)
+#ifdef _DEBUG
+void SetAssociativeCache::LogSetInfo(unsigned int setIndex)
 {
-    return address >> (m_NumberOfIndexBits + m_NumberOfOffsetBits);
+    std::cout << "\n set index:" << setIndex << "\n";
+    for (int i = 0; i < m_NumberOfWays; i++)
+        std::cout << i << "- tag:" << m_Sets[setIndex].tags[i] << std::endl;
+    std::cout << "\n\n";
 }
-inline uint32_t SetAssociativeCache::GetSetIndex(uint32_t address)
+void SetAssociativeCache::LogCacheInfo()
 {
-    unsigned int mask = 0xFFFFFFFF >> (32 - m_NumberOfIndexBits);
-    return ((address >> m_NumberOfOffsetBits) & mask);
+    std::cout << "line size: " << m_LineSize << std::endl;
+    std::cout << "number of ways : " << m_NumberOfWays << std::endl;
+    std::cout << "Tag bits: " << m_NumberOfTagBits << std::endl;
+    std::cout << "index bits: " << m_NumberOfIndexBits << std::endl;
+    std::cout << "offset bits: " << m_NumberOfOffsetBits << std::endl;
+    std::cout << "Number of Sets: " << m_NumberOfSets << std::endl;
 }
+
+void SetAssociativeCache::LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag)
+{
+    std::cout << "setIndex: " << setIndex << std::endl;
+    std::cout << "EXISTING TAG: " << m_Sets[setIndex].tags[replacementIndex] << std::endl;
+    std::cout << "New Tag: " << tag << std::endl;
+    std::cout << "Replacing at way number: " << replacementIndex << std::endl;
+}
+#endif
