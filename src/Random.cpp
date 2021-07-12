@@ -11,12 +11,12 @@ unsigned int Random::rand_()
 }
 unsigned int Random::memGenA()
 {
-    static unsigned int address1 = 0;
-    return (address1++) % (DRAM_SIZE);
+    static unsigned int address = 0;
+    return (address++) % (DRAM_SIZE);
 }
 unsigned int Random::memGenB()
 {
-    static unsigned int address2 = 0;
+    static unsigned int address = 0;
     return rand_() % (64 * 1024);
 }
 unsigned int Random::memGenC()
@@ -39,11 +39,11 @@ unsigned int Random::memGenD()
 }
 unsigned int Random::memGenE()
 {
-    static unsigned int address3 = 0;
-    return (address3++) % (1024 * 64);
+    static unsigned int address = 0;
+    return (address++) % (1024 * 64);
 }
 unsigned int Random::memGenF()
 {
-    static unsigned int address4 = 0;
-    return (address4 += 64) % (64 * 4 * 1024);
+    static unsigned int address = 0;
+    return (address += 64) % (64 * 4 * 1024);
 }
