@@ -60,7 +60,7 @@ void ExecuteExp(int lineSize, int ways, int expNumber)
 	double hitRatio[6];
 	for (uint32_t i = 0; i < 6; i++)
 	{
-		caches[i] = new SetAssociativeCache(ways, lineSize, ReplacmentPolicy::Random);
+		caches[i] = new SetAssociativeCache(ways, lineSize, ReplacmentPolicy::LRU, CACHE_SIZE);
 		hits[i] = 0;
 		hitRatio[i] = 0.0;
 	}

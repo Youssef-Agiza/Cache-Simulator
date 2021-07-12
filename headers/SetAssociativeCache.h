@@ -26,10 +26,7 @@ enum class ReplacmentPolicy
 class SetAssociativeCache
 {
 public:
-    SetAssociativeCache(unsigned int numberOfWays,
-                        unsigned int lineSize,
-                        ReplacmentPolicy policy = ReplacmentPolicy::Random,
-                        unsigned int cacheSize = CACHE_SIZE);
+    SetAssociativeCache(unsigned int numberOfWays, unsigned int lineSize, ReplacmentPolicy policy = ReplacmentPolicy::Random, unsigned int cacheSize = CACHE_SIZE);
     ~SetAssociativeCache();
     cacheResType TestCache(unsigned int address);
 
@@ -38,11 +35,8 @@ private:
     void InitalizeSets(unsigned int lineSize);
     void UpdateSet(unsigned int address);
 
-    /*utilities*/
-    unsigned int getSetIndex(unsigned int address);
-    unsigned int getTag(unsigned int address);
-
-    /*policies*/
+    inline uint32_t GetTag(uint32_t address);
+    inline uint32_t GetSetIndex(uint32_t address);
     uint32_t FindLeastFrequent(uint32_t setNumber);
     uint32_t FindNextReplacemntIndex(uint32_t setNumber);
     uint32_t FindLeastRecentlyUsed(uint32_t setNumber);
@@ -51,7 +45,7 @@ private:
         unsigned int *tags;
         unsigned short *validBits;
         unsigned int *frequency;
-        unsigned int *recentlyUsage;
+        unsigned int *leastUsed;
     };
 
     unsigned int m_NumberOfWays;
@@ -60,8 +54,8 @@ private:
     ReplacmentPolicy m_ReplacmentPolicy;
     unsigned int m_NumberOfSets;
     unsigned int m_NumberOfTagBits;
-    unsigned int m_NumberOfIndexBits;
     unsigned int m_NumberOfOffsetBits;
+    unsigned int m_NumberOfIndexBits;
 };
 
 #endif

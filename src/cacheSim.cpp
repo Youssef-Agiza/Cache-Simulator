@@ -6,17 +6,17 @@ void TestBench()
     int answer;
     std::cout << "Replacement policy:\n1-random\n2-LFU\n3-LRU\n";
     std::cin >> answer;
-    ReplacmentPolicy policy;
+    ReplacmentPolicy p;
     switch (answer)
     {
-    case 0:
-        policy = ReplacmentPolicy::Random;
-        break;
     case 1:
-        policy = ReplacmentPolicy::LFU;
+        p = ReplacmentPolicy::Random;
         break;
     case 2:
-        policy = ReplacmentPolicy::LRU;
+        p = ReplacmentPolicy::LFU;
+        break;
+    case 3:
+        p = ReplacmentPolicy::LRU;
         break;
     }
     SetAssociativeCache cache(2u, 32u, policy);
@@ -51,7 +51,7 @@ there:
 
 int main()
 {
-    //HandleInput();
-    TestBench();
+    HandleInput();
+    //TestBench();
     return 0;
 }
