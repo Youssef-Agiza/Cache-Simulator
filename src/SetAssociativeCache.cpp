@@ -113,9 +113,6 @@ void SetAssociativeCache::UpdateSet(unsigned int address)
     unsigned int setIndex = GetSetIndex(address);
     unsigned int tag = GetTag(address);
     Set &set = m_Sets[setIndex];
-#ifdef EXTREME_DEBUG
-    LogSetInfo(setIndex);
-#endif
 
     uint32_t replacementIndex = FindNextReplacemntIndex(setIndex);
 #if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
@@ -165,7 +162,7 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
     case ReplacementPolicy::LFU:
     {
         replacementIndex = FindLeastFrequent(setNumber);
-        m_Sets[setNumber].frequency[replacementIndex] = 0;
+        m_Sets[setNumber].frequency[replacementIndex] = 1;
         break;
     }
     case ReplacementPolicy::LRU:
@@ -186,14 +183,18 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
 #if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
 void SetAssociativeCache::LogSetInfo(unsigned int setIndex)
 {
-    std::cout << "\n set index:" << setIndex << "\n";
+    std::cout << "******LOGGING SET INFO******\n";
+    std::cout << "+-----------------------------------+\n";
+    std::cout << "\nset index:" << setIndex << "\n";
     for (int i = 0; i < m_NumberOfWays; i++)
         std::cout << i << " - tag:" << m_Sets[setIndex].tags[i] << std::endl;
-    std::cout << "\n\n";
+    std::cout << "+-----------------------------------+\n";
 }
 
 void SetAssociativeCache::LogCacheInfo()
 {
+    std::cout << "******LOGGING CACHE INFO******\n";
+    std::cout << "+-----------------------------------+\n";
     std::cout << "Replacement Policy: " << g_RepPoliciesStrings[(int)m_ReplacmentPolicy] << std::endl;
     std::cout << "line size: " << m_LineSize << std::endl;
     std::cout << "number of ways : " << m_NumberOfWays << std::endl;
@@ -201,15 +202,19 @@ void SetAssociativeCache::LogCacheInfo()
     std::cout << "index bits: " << m_NumberOfIndexBits << std::endl;
     std::cout << "offset bits: " << m_NumberOfOffsetBits << std::endl;
     std::cout << "Number of Sets: " << m_NumberOfSets << std::endl;
+    std::cout << "+-----------------------------------+\n";
 }
 
 void SetAssociativeCache::LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag, unsigned int address)
 {
+
+    std::cout << "******LOGGING UPDATE INFO******\n";
     std::cout << "+-----------------------------------+";
     std::cout << "ADDRESS: " << address << std::endl;
     std::cout << "setIndex: " << setIndex << std::endl;
     std::cout << "EXISTING TAG: " << m_Sets[setIndex].tags[replacementIndex] << std::endl;
     std::cout << "New Tag: " << tag << std::endl;
     std::cout << "Replacing at way number: " << replacementIndex << std::endl;
+    std::cout << "+-----------------------------------+\n";
 }
 #endif

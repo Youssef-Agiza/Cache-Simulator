@@ -1,7 +1,8 @@
 #include "../headers/Random.h"
 Random::Random()
     : m_w(0xABCCAB99), m_z(0xDEAD6902)
-{}
+{
+}
 
 unsigned int Random::rand_()
 {
