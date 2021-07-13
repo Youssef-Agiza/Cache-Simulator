@@ -1,6 +1,5 @@
 #include "../headers/Utilities.h"
-#include <climits>
-#include <random>
+
 #define NO_OF_Iterations 1000000
 void HandleInput()
 {
@@ -105,12 +104,12 @@ void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 	for (int i = 0; i < 6; i++)
 		hitRatio[i] = (100.0 * (double)(hits[i]) / (double)NO_OF_Iterations);
 
-	saveFiles(hitRatio, lineSize, ways, expNumber, policy);
+	SaveFiles(hitRatio, lineSize, ways, expNumber, policy);
 	for (uint32_t i = 0; i < 6; i++)
 		delete caches[i];
 }
 
-void saveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
+void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
 {
 	std::ofstream outFile("Outputs/Exp#" + std::to_string(expNumber) + " & " + ((expNumber == 1) ? std::to_string(ways) : "32") + " ways - " + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
 	int length = outFile.tellp();
@@ -150,7 +149,7 @@ void error(void)
 	exit(0);
 }
 
-/********************** Tests*********************************/
+/************************Tests*********************************/
 
 void Test1()
 {
@@ -170,7 +169,6 @@ void Test1()
 		p = ReplacementPolicy::LRU;
 		break;
 	}
-
 	SetAssociativeCache cache(2u, 32u, p, 128u);
 	uint32_t addresses[] = {0x070, 0x080, 0x068, 0x190, 0x084, 0x178, 0x08C, 0xF00, 0x064};
 	uint32_t arrSize = sizeof(addresses) / sizeof(uint32_t);

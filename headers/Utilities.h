@@ -16,14 +16,14 @@ void Exp1(ReplacementPolicy policy);
 void Exp2(ReplacementPolicy policy);
 
 /*
-possible restructure of the ExectureExp() for better readability:
-1- create function to initalize the variables at the begining
-2- create a function to do the loops and the calculations
-3- create a function to free the pointers at the end
-4- move the logic from ExecuteExp to those functions and call them
+    possible restructure of the ExectureExp() for better readability:
+    1- Create function to initalize the variables at the begining
+    2- Create a function to do the loops and the calculations
+    3- Create a function to free the pointers at the end
+    4- Move the logic from ExecuteExp to those functions and call them
 */
 void ExecuteExp(int bytes, int ways, int expNumber, ReplacementPolicy policy);
-void saveFiles(double hitRatio[], int bytes, int ways, int expNumber, ReplacementPolicy p);
+void SaveFiles(double hitRatio[], int bytes, int ways, int expNumber, ReplacementPolicy p);
 unsigned int GetAddress(int j, Random &randGen1, Random &randGen2);
 void error(void);
 
@@ -34,6 +34,7 @@ void error(void);
  *         addresses are fixed used from an online reference. 
  * Result: The test performs two iterations on the addresses chosen and the hit ratio is supposed to be 44% in the first
  *          and 77% second time.
+ * YOUTUBE LINK: https://www.youtube.com/watch?v=quZe1ehz-EQ&t=201s
  */
 void Test1();
 
