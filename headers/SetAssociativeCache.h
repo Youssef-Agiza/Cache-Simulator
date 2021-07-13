@@ -65,7 +65,6 @@ private:
     inline uint32_t GetSetIndex(uint32_t address);
 
     //precondition: cacheSize is given, m_NumberOfWays and m_NumberOfSets are initalized correctly
-    //postcondition: m_NumberOfSets, m_NumberOfTagbits, m_NumberOfOffsetBits, m_NumberOfIndexBits are set
     void InitializeBitNumbers(uint32_t cacheSize);
 
     /*Replacement Policy helpers*/
@@ -87,7 +86,6 @@ private:
     //number of bits/ways
     uint32_t m_NumberOfSets;
     uint32_t m_NumberOfWays;
-    uint32_t m_NumberOfTagBits;
     uint32_t m_NumberOfIndexBits;
     uint32_t m_NumberOfOffsetBits;
 };

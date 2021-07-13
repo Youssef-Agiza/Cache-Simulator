@@ -20,7 +20,6 @@ void SetAssociativeCache::InitializeBitNumbers(uint32_t cacheSize)
     m_NumberOfSets = (unsigned int)(cacheSize) / (m_LineSize * m_NumberOfWays);
     m_NumberOfOffsetBits = (uint32_t)(log2(m_LineSize));
     m_NumberOfIndexBits = (uint32_t)log2(m_NumberOfSets);
-    m_NumberOfTagBits = 32 - (m_NumberOfOffsetBits + m_NumberOfIndexBits);
 }
 
 SetAssociativeCache::~SetAssociativeCache()
@@ -197,7 +196,6 @@ void SetAssociativeCache::LogCacheInfo()
     std::cout << "Replacement Policy: " << g_RepPoliciesStrings[(int)m_ReplacmentPolicy] << std::endl;
     std::cout << "line size: " << m_LineSize << std::endl;
     std::cout << "number of ways : " << m_NumberOfWays << std::endl;
-    std::cout << "Tag bits: " << m_NumberOfTagBits << std::endl;
     std::cout << "index bits: " << m_NumberOfIndexBits << std::endl;
     std::cout << "offset bits: " << m_NumberOfOffsetBits << std::endl;
     std::cout << "Number of Sets: " << m_NumberOfSets << std::endl;
