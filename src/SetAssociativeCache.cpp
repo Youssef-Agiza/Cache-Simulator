@@ -2,20 +2,20 @@
 
 SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays,
                                          unsigned int lineSize,
-                                         ReplacmentPolicy policy,
+                                         ReplacementPolicy policy,
                                          unsigned int cacheSize) : m_NumberOfWays(numberOfWays),
                                                                    m_LineSize(lineSize),
                                                                    m_ReplacmentPolicy(policy)
 {
-    getBits(cacheSize);
+    InitializeBitNumbers(cacheSize);
     InitalizeSets(m_LineSize);
 
-#ifdef _DEBUG
+#if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
     LogCacheInfo();
 #endif
 }
 
-void SetAssociativeCache::getBits(uint32_t cacheSize)
+void SetAssociativeCache::InitializeBitNumbers(uint32_t cacheSize)
 {
     m_NumberOfSets = (unsigned int)(cacheSize) / (m_LineSize * m_NumberOfWays);
     m_NumberOfOffsetBits = (uint32_t)(log2(m_LineSize));
@@ -73,7 +73,7 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
 
     // Referecne variable to ease the use of the array
     Set &set = m_Sets[setIndex];
-#ifdef _DEBUG
+#ifdef EXTREME_DEBUG
     LogSetInfo(setIndex);
 #endif
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
@@ -94,8 +94,16 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
 cacheResType SetAssociativeCache::TestCache(unsigned int address)
 {
     if (IsInSet(address))
+    {
+#if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
+        std::cout << "===>Hits Address: " << address << std::endl;
+#endif
         return HIT;
+    }
 
+#if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
+    std::cout << "<===Misses Address: " << address << std::endl;
+#endif
     UpdateSet(address);
     return MISS;
 }
@@ -105,13 +113,13 @@ void SetAssociativeCache::UpdateSet(unsigned int address)
     unsigned int setIndex = GetSetIndex(address);
     unsigned int tag = GetTag(address);
     Set &set = m_Sets[setIndex];
-#ifdef _DEBUG
+#ifdef EXTREME_DEBUG
     LogSetInfo(setIndex);
 #endif
 
     uint32_t replacementIndex = FindNextReplacemntIndex(setIndex);
-#ifdef _DEBUG
-    LogUpdateInfo(setIndex, replacementIndex, tag);
+#if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
+    LogUpdateInfo(setIndex, replacementIndex, tag, address);
 #endif
     set.tags[replacementIndex] = tag;
     set.validBits[replacementIndex] = VALID;
@@ -149,18 +157,18 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
     uint32_t replacementIndex = 0;
     switch (m_ReplacmentPolicy)
     {
-    case ReplacmentPolicy::Random:
+    case ReplacementPolicy::Random:
     {
         replacementIndex = rand() % m_NumberOfWays;
         break;
     }
-    case ReplacmentPolicy::LFU:
+    case ReplacementPolicy::LFU:
     {
         replacementIndex = FindLeastFrequent(setNumber);
         m_Sets[setNumber].frequency[replacementIndex] = 0;
         break;
     }
-    case ReplacmentPolicy::LRU:
+    case ReplacementPolicy::LRU:
     {
         replacementIndex = FindLeastRecentlyUsed(setNumber);
         for (int j = 0; j < m_NumberOfWays; j++)
@@ -175,16 +183,18 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
     return replacementIndex;
 }
 
-#ifdef _DEBUG
+#if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
 void SetAssociativeCache::LogSetInfo(unsigned int setIndex)
 {
     std::cout << "\n set index:" << setIndex << "\n";
     for (int i = 0; i < m_NumberOfWays; i++)
-        std::cout << i << "- tag:" << m_Sets[setIndex].tags[i] << std::endl;
+        std::cout << i << " - tag:" << m_Sets[setIndex].tags[i] << std::endl;
     std::cout << "\n\n";
 }
+
 void SetAssociativeCache::LogCacheInfo()
 {
+    std::cout << "Replacement Policy: " << g_RepPoliciesStrings[(int)m_ReplacmentPolicy] << std::endl;
     std::cout << "line size: " << m_LineSize << std::endl;
     std::cout << "number of ways : " << m_NumberOfWays << std::endl;
     std::cout << "Tag bits: " << m_NumberOfTagBits << std::endl;
@@ -193,8 +203,10 @@ void SetAssociativeCache::LogCacheInfo()
     std::cout << "Number of Sets: " << m_NumberOfSets << std::endl;
 }
 
-void SetAssociativeCache::LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag)
+void SetAssociativeCache::LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag, unsigned int address)
 {
+    std::cout << "+-----------------------------------+";
+    std::cout << "ADDRESS: " << address << std::endl;
     std::cout << "setIndex: " << setIndex << std::endl;
     std::cout << "EXISTING TAG: " << m_Sets[setIndex].tags[replacementIndex] << std::endl;
     std::cout << "New Tag: " << tag << std::endl;

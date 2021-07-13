@@ -16,19 +16,22 @@ enum Validity
     VALID = 1
 };
 
-enum class ReplacmentPolicy
+enum class ReplacementPolicy
 {
-    Random,
+    Random = 0,
     LFU,
     LRU
 };
+
+// Global string array that has the string values of the enum
+const std::string g_RepPoliciesStrings[] = {"Random", "LFU", "LRU"};
 
 class SetAssociativeCache
 {
 public:
     SetAssociativeCache(unsigned int numberOfWays,
                         unsigned int lineSize,
-                        ReplacmentPolicy policy = ReplacmentPolicy::Random,
+                        ReplacementPolicy policy = ReplacementPolicy::Random,
                         unsigned int cacheSize = CACHE_SIZE);
     ~SetAssociativeCache();
     cacheResType TestCache(unsigned int address);
@@ -63,23 +66,23 @@ private:
 
     //precondition: cacheSize is given, m_NumberOfWays and m_NumberOfSets are initalized correctly
     //postcondition: m_NumberOfSets, m_NumberOfTagbits, m_NumberOfOffsetBits, m_NumberOfIndexBits are set
-    void getBits(uint32_t cacheSize);
+    void InitializeBitNumbers(uint32_t cacheSize);
 
     /*Replacement Policy helpers*/
     uint32_t FindLeastFrequent(uint32_t setNumber);
     uint32_t FindNextReplacemntIndex(uint32_t setNumber);
     uint32_t FindLeastRecentlyUsed(uint32_t setNumber);
 
-#ifdef _DEBUG
+#if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
     /*for debugging*/
     void LogSetInfo(unsigned int setIndex);
     void LogCacheInfo();
-    void LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag);
+    void LogUpdateInfo(unsigned int setIndex, unsigned int replacementIndex, unsigned int tag, unsigned int address);
 #endif
 
     unsigned int m_LineSize;
     Set *m_Sets;
-    ReplacmentPolicy m_ReplacmentPolicy;
+    ReplacementPolicy m_ReplacmentPolicy;
 
     //number of bits/ways
     uint32_t m_NumberOfSets;

@@ -5,6 +5,10 @@
 void HandleInput()
 {
 	std::string answer = "";
+	//Function pointer array that contains pointers to the different experiments that can be made
+	void (*expFunctions[])(ReplacementPolicy) = {Exp1, Exp2};
+	//calculauting the number of functions in the array
+	uint32_t numOfFunctions = sizeof(expFunctions) / sizeof(void (*)(ReplacementPolicy));
 	while (answer == "")
 	{
 		std::cout << "Enter the experiment number\n";
@@ -12,55 +16,79 @@ void HandleInput()
 		std::cout << "Experiment #2: measuring and graphing the hit ratios for different number of ways\n";
 		std::cout << "Enter one digit indicating the required experiment number (1 or 2)\n";
 		std::cin >> answer;
-		switch (stoi(answer))
+
+		if (!isdigit(answer[0]) || answer[0] > (numOfFunctions + '0'))
 		{
-		case 1:
-			Exp1();
-			break;
-		case 2:
-			Exp2();
-			break;
-		default:
-			std::cout << "Invalid input!\n";
 			answer = "";
-			break;
+			continue;
 		}
+		int32_t expNumber = answer[0] - '0' - 1;
+		ReplacementPolicy policy = ReplacementPolicy::Random;
+		answer = "";
+		while (answer == "")
+		{
+			std::cout << "Enter the replacement policy you want the test to work with:\n";
+			std::cout << "1- Random\n2- LFU (Least Frequently Used)\n3- LRU (Least Recently Used)\n";
+			std::cin >> answer;
+			if (!isdigit(answer[0]) || answer[0] > '3')
+			{
+				std::cout << "Entered Wrong value\n";
+				answer = "";
+				continue;
+			}
+		}
+		policy = (ReplacementPolicy)(answer[0] - '0' - 1);
+		//Calling the correct experiment function
+		expFunctions[expNumber](policy);
+		// switch (expNumber)
+		// {
+		// case 1:
+		// 	Exp1(policy);
+		// 	break;
+		// case 2:
+		// 	Exp2(policy);
+		// 	break;
+		// default:
+		// 	std::cout << "Invalid input!\n";
+		// 	answer = "";
+		// 	break;
+		// }
 	}
 }
 
-void Exp1()
+void Exp1(ReplacementPolicy policy)
 {
-	ExecuteExp(16, 1, 1);
-	ExecuteExp(32, 1, 1);
-	ExecuteExp(64, 1, 1);
-	ExecuteExp(128, 1, 1);
-	std::cout << "\nSaved PHASE1: Outputs/Exp#1 & 1 ways.csv\n";
-	ExecuteExp(16, 8, 1);
-	ExecuteExp(32, 8, 1);
-	ExecuteExp(64, 8, 1);
-	ExecuteExp(128, 8, 1);
-	std::cout << "\nSaved PHASE2: Outputs/Exp#1 & 8 ways.csv\n";
+	ExecuteExp(16, 1, 1, policy);
+	ExecuteExp(32, 1, 1, policy);
+	ExecuteExp(64, 1, 1, policy);
+	ExecuteExp(128, 1, 1, policy);
+	std::cout << "\nSaved Part1 in ./Outputs/\n";
+	ExecuteExp(16, 8, 1, policy);
+	ExecuteExp(32, 8, 1, policy);
+	ExecuteExp(64, 8, 1, policy);
+	ExecuteExp(128, 8, 1, policy);
+	std::cout << "\nSaved Part2 in ./Outputs/";
 }
 
-void Exp2()
+void Exp2(ReplacementPolicy policy)
 {
-	ExecuteExp(32, 1, 2);
-	ExecuteExp(32, 2, 2);
-	ExecuteExp(32, 4, 2);
-	ExecuteExp(32, 8, 2);
-	ExecuteExp(32, 16, 2);
-	ExecuteExp(32, 32, 2);
-	std::cout << "\nSaved PHASE1: Outputs/Exp#2 & 32 ways.csv\n";
+	ExecuteExp(32, 1, 2, policy);
+	ExecuteExp(32, 2, 2, policy);
+	ExecuteExp(32, 4, 2, policy);
+	ExecuteExp(32, 8, 2, policy);
+	ExecuteExp(32, 16, 2, policy);
+	ExecuteExp(32, 32, 2, policy);
+	std::cout << "\nSaved Exp2\n";
 }
 
-void ExecuteExp(int lineSize, int ways, int expNumber)
+void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 {
 	SetAssociativeCache *caches[6];
 	unsigned int hits[6];
 	double hitRatio[6];
 	for (uint32_t i = 0; i < 6; i++)
 	{
-		caches[i] = new SetAssociativeCache(ways, lineSize, ReplacmentPolicy::LRU, CACHE_SIZE);
+		caches[i] = new SetAssociativeCache(ways, lineSize, policy, CACHE_SIZE);
 		hits[i] = 0;
 		hitRatio[i] = 0.0;
 	}
@@ -77,14 +105,14 @@ void ExecuteExp(int lineSize, int ways, int expNumber)
 	for (int i = 0; i < 6; i++)
 		hitRatio[i] = (100.0 * (double)(hits[i]) / (double)NO_OF_Iterations);
 
-	saveFiles(hitRatio, lineSize, ways, expNumber);
+	saveFiles(hitRatio, lineSize, ways, expNumber, policy);
 	for (uint32_t i = 0; i < 6; i++)
 		delete caches[i];
 }
 
-void saveFiles(double hitRatio[], int lineSize, int ways, int expNumber)
+void saveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
 {
-	std::ofstream outFile("Outputs/Exp#" + std::to_string(expNumber) + " & " + ((expNumber == 1) ? std::to_string(ways) : "32") + " ways" + ".csv", std::ios::app | std::ios::ate);
+	std::ofstream outFile("Outputs/Exp#" + std::to_string(expNumber) + " & " + ((expNumber == 1) ? std::to_string(ways) : "32") + " ways - " + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
 	int length = outFile.tellp();
 	if (length == 0)
 		outFile << " , A,B,C,D,E,F\n";
@@ -129,17 +157,17 @@ void Test1()
 	int answer;
 	std::cout << "Replacement policy:\n1-random\n2-LFU\n3-LRU\n";
 	std::cin >> answer;
-	ReplacmentPolicy p;
+	ReplacementPolicy p;
 	switch (answer)
 	{
 	case 1:
-		p = ReplacmentPolicy::Random;
+		p = ReplacementPolicy::Random;
 		break;
 	case 2:
-		p = ReplacmentPolicy::LFU;
+		p = ReplacementPolicy::LFU;
 		break;
 	case 3:
-		p = ReplacmentPolicy::LRU;
+		p = ReplacementPolicy::LRU;
 		break;
 	}
 

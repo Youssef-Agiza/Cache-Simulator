@@ -4,7 +4,7 @@
 
 int main()
 {
-    //  HandleInput();
-    Test1();
+    HandleInput();
+    //Test1();
     return 0;
 }

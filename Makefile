@@ -12,14 +12,14 @@ Random.obj: $(SRC_DIR)/Random.cpp $(INC_DIR)/Random.h
 	$(CC) $(SRC_DIR)/Random.cpp $(CCFLAGS) -o Random.obj
 
 
-SetAssociativeCache.obj: $(SRC_DIR)/SetAssociativeCache.cpp $(INC_DIR)/SetAssociativeCache.h
+SetAssociativeCache.obj: $(SRC_DIR)/SetAssociativeCache.cpp $(INC_DIR)/SetAssociativeCache.h $(INC_DIR)/PCH.h
 	$(CC) $(SRC_DIR)/SetAssociativeCache.cpp $(CCFLAGS) -o SetAssociativeCache.obj
 
 
-cacheSim.obj: $(SRC_DIR)/cacheSim.cpp $(INC_DIR)/PCH.h $(INC_DIR)/SetAssociativeCache.h $(INC_DIR)/Random.h
+cacheSim.obj: $(SRC_DIR)/cacheSim.cpp $(INC_DIR)/PCH.h $(INC_DIR)/SetAssociativeCache.h $(INC_DIR)/Random.h 
 	$(CC) $(SRC_DIR)/cacheSim.cpp $(CCFLAGS) -o cacheSim.obj
 
-Utilities.obj: $(SRC_DIR)/Utilities.cpp $(INC_DIR)/Utilities.h $(INC_DIR)/PCH.h
+Utilities.obj: $(SRC_DIR)/Utilities.cpp $(INC_DIR)/Utilities.h $(INC_DIR)/PCH.h $(INC_DIR)/SetAssociativeCache.h
 	$(CC) $(SRC_DIR)/Utilities.cpp $(CCFLAGS) -o Utilities.obj
 
 clean:

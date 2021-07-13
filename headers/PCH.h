@@ -3,9 +3,16 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define DEBUG_LEVEL 0
+#if (DEBUG_LEVEL == 1)
+#define NORM_DEBUG
+#elif (DEBUG_LEVEL == 2)
+#define EXTREME_DEBUG
+#endif
+
 #define DBG 1
-#define DRAM_SIZE 4096 //64 * 1024 * 1024
-#define CACHE_SIZE 128 //64 * 1024
+#define DRAM_SIZE 64 * 1024 * 1024
+#define CACHE_SIZE 64 * 1024
 
 #include <iostream>
 #include <iomanip>

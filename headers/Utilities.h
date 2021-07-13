@@ -12,8 +12,8 @@
 */
 void HandleInput();
 
-void Exp1();
-void Exp2();
+void Exp1(ReplacementPolicy policy);
+void Exp2(ReplacementPolicy policy);
 
 /*
 possible restructure of the ExectureExp() for better readability:
@@ -22,8 +22,8 @@ possible restructure of the ExectureExp() for better readability:
 3- create a function to free the pointers at the end
 4- move the logic from ExecuteExp to those functions and call them
 */
-void ExecuteExp(int bytes, int ways, int expNumber);
-void saveFiles(double hitRatio[], int bytes, int ways, int expNumber);
+void ExecuteExp(int bytes, int ways, int expNumber, ReplacementPolicy policy);
+void saveFiles(double hitRatio[], int bytes, int ways, int expNumber, ReplacementPolicy p);
 unsigned int GetAddress(int j, Random &randGen1, Random &randGen2);
 void error(void);
 
