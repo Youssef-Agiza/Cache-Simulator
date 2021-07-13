@@ -1,6 +1,4 @@
 #include "../headers/Utilities.h"
-#include <iomanip>
-#include <array>
 
 int main()
 {
