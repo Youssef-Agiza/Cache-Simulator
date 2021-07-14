@@ -37,5 +37,11 @@ void error(void);
  * YOUTUBE LINK: https://www.youtube.com/watch?v=quZe1ehz-EQ&t=201s
  */
 void Test1();
+void Test2();
 
+//The patternA: Creates addresses of intervals of 32
+//This is used for testing 32
+uint32_t *GetPatternA(uint32_t &size);
+uint32_t *GetPatternB(uint32_t &size);
+uint32_t *GetPatternC(uint32_t &size);
 #endif

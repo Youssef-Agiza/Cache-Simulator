@@ -17,6 +17,7 @@ SetAssociativeCache::SetAssociativeCache(unsigned int numberOfWays,
 
 void SetAssociativeCache::InitializeBitNumbers(uint32_t cacheSize)
 {
+    // Initializing several parameters needed
     m_NumberOfSets = (unsigned int)(cacheSize) / (m_LineSize * m_NumberOfWays);
     m_NumberOfOffsetBits = (uint32_t)(log2(m_LineSize));
     m_NumberOfIndexBits = (uint32_t)log2(m_NumberOfSets);
@@ -24,7 +25,7 @@ void SetAssociativeCache::InitializeBitNumbers(uint32_t cacheSize)
 
 SetAssociativeCache::~SetAssociativeCache()
 {
-
+    //Deleting the memory we used in the class
     for (uint32_t i = 0; i < m_NumberOfSets; i++)
     {
         delete[] m_Sets[i].tags;
@@ -38,6 +39,7 @@ SetAssociativeCache::~SetAssociativeCache()
 
 void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
 {
+    // Initalizing sets
     m_Sets = new Set[m_NumberOfSets];
     for (uint32_t i = 0; i < m_NumberOfSets; i++)
     {
@@ -47,6 +49,8 @@ void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
         m_Sets[i].leastUsed = new unsigned int[m_NumberOfWays];
         for (int j = 0; j < m_NumberOfWays; j++)
         {
+            //Every set starts with all the ways frequency = 0 and
+            //the number of times it was used = 0
             m_Sets[i].leastUsed[j] = 0;
             m_Sets[i].frequency[j] = 0;
             m_Sets[i].tags[j] = 0;
@@ -57,12 +61,14 @@ void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
 
 inline uint32_t SetAssociativeCache::GetTag(uint32_t address)
 {
+    //The tag is the address excluding the offsetbits and the index bits
     return address >> (m_NumberOfIndexBits + m_NumberOfOffsetBits);
 }
 
 inline uint32_t SetAssociativeCache::GetSetIndex(uint32_t address)
 {
-    uint32_t mask = 0xFFFFFFFF >> (32 - m_NumberOfIndexBits); //mask with 1's equal to the number of index bits
+    //mask with 1's equal to the number of index bits (inspired by RVIC32IC Disassembler)
+    uint32_t mask = 0xFFFFFFFF >> (32 - m_NumberOfIndexBits);
     return ((address >> m_NumberOfOffsetBits) & mask);
 }
 
@@ -73,9 +79,15 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
 
     // Referecne variable to ease the use of the array
     Set &set = m_Sets[setIndex];
+
+    //For debugging purposes only
 #ifdef EXTREME_DEBUG
     LogSetInfo(setIndex);
 #endif
+
+    //We go through all the ways in the set we found and we check
+    //If the tag in the address is in the set, then we return it is & we update
+    //the rest of the set parameters
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (set.validBits[i] == VALID && set.tags[i] == tag)
         {
@@ -86,7 +98,8 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
                     //increase least used for the other blocks in the set(read the comments for LeastRecentlyUsed function)
                     set.leastUsed[j]++;
 
-            set.leastUsed[i] = 0; //reset current access index least used value
+            //reset current access index least used value
+            set.leastUsed[i] = 0;
             return true;
         }
 
@@ -95,6 +108,7 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
 
 cacheResType SetAssociativeCache::TestCache(unsigned int address)
 {
+    //checking if the address is in the test and if so we return it is a hit
     if (IsInSet(address))
     {
 #if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
@@ -106,6 +120,7 @@ cacheResType SetAssociativeCache::TestCache(unsigned int address)
 #if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
     std::cout << "<===Misses Address: " << address << std::endl;
 #endif
+    // Else we update the set with that address and return MISS
     UpdateSet(address);
     return MISS;
 }
@@ -116,12 +131,14 @@ void SetAssociativeCache::UpdateSet(unsigned int address)
     unsigned int tag = GetTag(address);
     Set &set = m_Sets[setIndex];
 
+    //We find which line we want to replace in the set
     uint32_t replacementIndex = FindNextReplacemntIndex(setIndex);
+    // and we replace it
+    set.tags[replacementIndex] = tag;
+    set.validBits[replacementIndex] = VALID;
 #if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
     LogUpdateInfo(setIndex, replacementIndex, tag, address);
 #endif
-    set.tags[replacementIndex] = tag;
-    set.validBits[replacementIndex] = VALID;
 }
 
 uint32_t SetAssociativeCache::FindLeastFrequent(uint32_t setNumber)
@@ -203,7 +220,7 @@ void SetAssociativeCache::LogSetInfo(unsigned int setIndex)
     std::cout << "+-----------------------------------+\n";
     std::cout << "\nset index:" << setIndex << "\n";
     for (int i = 0; i < m_NumberOfWays; i++)
-        std::cout << i << " - tag:" << m_Sets[setIndex].tags[i] << std::endl;
+        std::cout << i << " - tag:" << m_Sets[setIndex].tags[i] << " VALID: " << m_Sets[setIndex].validBits[i] << std::endl;
     std::cout << "+-----------------------------------+\n";
 }
 
@@ -231,5 +248,7 @@ void SetAssociativeCache::LogUpdateInfo(unsigned int setIndex, unsigned int repl
     std::cout << "New Tag: " << tag << std::endl;
     std::cout << "Replacing at way number: " << replacementIndex << std::endl;
     std::cout << "+-----------------------------------+\n";
+    std::cout << "THE NEW SET INFO\n";
+    LogSetInfo(setIndex);
 }
 #endif

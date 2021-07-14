@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-import pandas 
+import pandas
 import numpy as np
 import sys
 import ntpath
@@ -63,4 +63,3 @@ def main():
 
 
 main()
-    

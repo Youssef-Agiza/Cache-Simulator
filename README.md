@@ -48,7 +48,7 @@ The plotting program is called plotter.py. plotter.py expectes input format in .
 
    - **Least Recently Used(LRU) policy idea:**
 
-     Every set in the cache will have a member "leastUsed" which will increase every time a set is accessed but the memory line is not used. That is, "least used" indicates how much recently the memory line was **not** accessed. th For example, assume we have 4-way sets and we accessed the second block in set number 5. Now, all the blocks except the second have not been "recently used," thus, we increase the leastUsed value for all the block except the second block. Then, to find the memory line to be replaced (least recently used), we loop over all the block in the set and choose the one with the _largest_ value. Bottom line is: leastUsed increases when the line was accessed longer time ago and decreases the more recently it was accessed.
+     Every set in the cache will have a member `leastUsed` which will increase every time a set is accessed but the memory line is not used. That is, _least used_ indicates how much recently the memory line was **not** accessed. For example, assume we have 4-way sets and we accessed the second block in set number 5. Now, all the blocks except the second have not been "recently used," thus, we increase the leastUsed value for all the block except the second block. Then, to find the memory line to be replaced (least recently used), we loop over all the block in the set and choose the one with the _largest_ value. Bottom line is: leastUsed increases when the line was accessed longer time ago and decreases the more recently it was accessed.
 
    - **Least Frequenctly Used(LFU) policy idea:**
 
