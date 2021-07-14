@@ -63,7 +63,14 @@
     "random": "cpp",
     "string_view": "cpp",
     "sstream": "cpp",
-    "bitset": "cpp"
+    "bitset": "cpp",
+    "list": "cpp",
+    "locale": "cpp",
+    "map": "cpp",
+    "stack": "cpp",
+    "xlocbuf": "cpp",
+    "xlocmes": "cpp",
+    "xtree": "cpp"
   },
   "python.defaultInterpreterPath": "usr/bin/python3"
 }

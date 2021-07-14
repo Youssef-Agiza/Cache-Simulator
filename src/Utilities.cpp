@@ -6,7 +6,7 @@ void HandleInput()
 	std::string answer = "";
 	//Function pointer array that contains pointers to the different experiments/tests that can be made
 	void (*expFunctions[])(ReplacementPolicy) = {Exp1, Exp2};
-	void (*testFunctions[])() = {TestA, TestB, TestC, TestD};
+	void (*testFunctions[])() = {TestA, TestB, TestC};
 	//calculauting the number of functions in the array
 	uint32_t numOfFunctions = sizeof(expFunctions) / sizeof(void (*)(ReplacementPolicy));
 	//Taking the user input to decide which experiement to be excuted and graphed
@@ -15,14 +15,13 @@ void HandleInput()
 		std::cout << "Enter the a valid request number\n";
 		std::cout << "1-Experiment #1: measuring and graphing the hit ratios for each line size\n";
 		std::cout << "2-Experiment #2: measuring and graphing the hit ratios for different number of ways\n";
-		std::cout << "3-Test #a\n";
-		std::cout << "4-Test #b\n";
-		std::cout << "5-Test #c\n";
-		std::cout << "6-Test #d\n";
+		std::cout << "3-Test #A\n";
+		std::cout << "4-Test #B\n";
+		std::cout << "5-Test #C\n";
 		std::cout << "Enter one digit indicating the required experiment number (1 or 2), or a test number (3 (#a), 4 (#b), 5 (#c), or 6 (#d))\n";
 		std::cin >> answer;
 
-		if (!isdigit(answer[0]) || answer[0] > (numOfFunctions + '0' + '4'))
+		if (!isdigit(answer[0]) || answer[0] > '5')
 		{
 			answer = "";
 			continue;
@@ -30,11 +29,11 @@ void HandleInput()
 		int32_t expNumber = answer[0] - '0' - 1;
 
 		//Calling the correct experiment function
-		if (answer == "1" || answer == "2")
+		if (expNumber <= 1)
 			for (int i = 0; i < 3; i++)
 				expFunctions[expNumber](ReplacementPolicy(i));
 		else
-			testFunctions[expNumber - 3]();
+			testFunctions[expNumber - 2]();
 	}
 }
 //A function to excute different parts of first experiment
@@ -168,53 +167,20 @@ void error(void)
 }
 
 /************************Tests*********************************/
-
 void TestA()
 {
-	int answer;
-	std::cout << "Replacement policy:\n1-random\n2-LFU\n3-LRU\n";
-	std::cin >> answer;
-	ReplacementPolicy p;
-	switch (answer)
-	{
-	case 1:
-		p = ReplacementPolicy::Random;
-		break;
-	case 2:
-		p = ReplacementPolicy::LFU;
-		break;
-	case 3:
-		p = ReplacementPolicy::LRU;
-		break;
-	}
-	SetAssociativeCache cache(2u, 32u, p, 128u);
-	uint32_t addresses[] = {0x070, 0x080, 0x068, 0x190, 0x084, 0x178, 0x08C, 0xF00, 0x064};
-	uint32_t arrSize = sizeof(addresses) / sizeof(uint32_t);
+	uint32_t size;
+	uint32_t *pattern = GetPatternA(size);
+	SetAssociativeCache cache(1, 4, ReplacementPolicy::LRU, 128);
 	uint32_t hitNumber = 0;
-	double hitRatio;
-	int times = 0;
-there:
-	for (uint32_t i = 0; i < arrSize; i++)
+	for (uint32_t i = 0; i < size; i++)
 	{
-		std::cout << "+---------------------+\n NEW TEST CACHE\n";
-		if (cache.TestCache(addresses[i]) == HIT)
-		{
-			std::cout << "The address: 0x" << std::hex << addresses[i] << " performs HIT\n";
+		if (cache.TestCache(pattern[i]))
 			hitNumber++;
-		}
-		else
-			std::cout << "The address: 0x" << std::hex << addresses[i] << " performs MISS\n";
 	}
-	times++;
-	hitRatio = (100.0 * hitNumber) / (arrSize);
-	std::cout << "Hit ratio is " << hitRatio << std::endl;
-	hitNumber = 0;
-	if (times == 1)
-	{
-		std::cout << "\n +-------------+\nGoing There\n";
-		goto there;
-	}
-	std::cout << "End of the simulation\n";
+
+	std::cout << (100.0 * hitNumber / size);
+	delete[] pattern;
 }
 
 void TestB()
@@ -235,45 +201,19 @@ void TestB()
 
 void TestC()
 {
-	uint32_t size;
-	uint32_t *pattern = GetPatternA(size);
-	SetAssociativeCache cache(4, 8, ReplacementPolicy::LRU, 1024);
-	uint32_t hitNumber = 0;
-	for (uint32_t i = 0; i < size; i++)
+	uint32_t addresses[] = {0x070, 0x080, 0x068, 0x190, 0x084, 0x178, 0x08C, 0xF00, 0x064};
+	uint32_t size = sizeof(addresses) / sizeof(uint32_t);
+	SetAssociativeCache cache(2u, 32u, ReplacementPolicy::LRU, 128u);
+	for (int times = 0; times < 2; times++)
 	{
-		if (cache.TestCache(pattern[i]))
-			hitNumber++;
+		uint32_t hitNumber = 0;
+		for (uint32_t i = 0; i < size; i++)
+		{
+			if (cache.TestCache(addresses[i]))
+				hitNumber++;
+		}
+		std::cout << "HIT RATE: " << (100.0 * hitNumber / size) << std::endl;
 	}
-
-	std::cout << (100.0 * hitNumber / size);
-	delete[] pattern;
-}
-
-void TestD()
-{
-	uint32_t size;
-	uint32_t *pattern = GetPatternC(size);
-	SetAssociativeCache cache(1, 4, ReplacementPolicy::LRU, 128);
-	uint32_t hitNumber = 0;
-	for (uint32_t i = 0; i < size; i++)
-	{
-		if (cache.TestCache(pattern[i]))
-			hitNumber++;
-	}
-
-	std::cout << (100.0 * hitNumber / size);
-	delete[] pattern;
-}
-
-uint32_t *GetPatternA(uint32_t &size)
-{
-	size = 100;
-	uint32_t *array = new uint32_t[size];
-	for (uint32_t i = 0; i < size; i++)
-	{
-		array[i] = i * 32;
-	}
-	return array;
 }
 
 //To test Cache ways
@@ -282,7 +222,7 @@ uint32_t *GetPatternA(uint32_t &size)
 //128B CacheSize
 uint32_t *GetPatternB(uint32_t &size)
 {
-	size = 10;
+	size = 100;
 	uint32_t *array = new uint32_t[size];
 	uint32_t startingValue = 0b00100;
 	for (uint32_t i = 0; i < size; i++)
@@ -292,17 +232,18 @@ uint32_t *GetPatternB(uint32_t &size)
 
 //Testing replacement for 1-way SetAssociativeCache (direct cache behaviour)
 //Expected HIT rate = 0
-uint32_t *GetPatternC(uint32_t &size)
+//2 = 0b00000010
+//130 = 0b10000010
+//Same set but different TAG
+
+uint32_t *GetPatternA(uint32_t &size)
 {
-	size = 16;
+	size = 100;
 	uint32_t *array = new uint32_t[size];
 	array[0] = 2;
 
 	for (uint32_t i = 1; i < size; i++)
 	{
-		//2 = 0b00000010
-		//130 = 0b10000010
-		//Same set but different TAG
 		if (array[i - 1] == 2)
 			array[i] = 130;
 		else
