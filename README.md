@@ -2,28 +2,45 @@
 
 ## Usage guide
 
-1.  Navigate to the repo directory.
-2.  To build executable, run:
+1.  clone repo:
+
+        git clone https://github.com/Youssef-Agiza/Cache-Simulator.git <dir_name>
+
+2.  Navigate to repo directory:
+
+        cd <dir_name>
+
+3.  To build executable, run:
 
         make
 
-3.  To run cache simulation run:
+4.  To run cache simulation run:
 
         ./cacheSim.exe
 
     The output is stored in "outputs" folder.
 
-4.  Drawing plots:
-    plotter.py The expectes input format in .csv that has 7 columns, the first one has the values that will be plotted on the x-axis. The first row is expected to have the titles of each colum, with the column titles are expected to be as follows: <x_col_title>,A,B,C,D,E,F.
+5.  Drawing plots, run:
 
-         ./plotter/plotter.py  <exp_number> <file_name> <x_col_title>(optional)
+        make plotOutputs
+
+6.  Output destination:\
+    The output .csv files are store "outputs" directory, and plots are stores in "plots" directory. \
+     **note:** Those directory must exist for the program to work correctly. They are create by default in after running the make command. But if not, the user should create them manually or run:
+
+        make outputDir
+
+## Plotter program
+
+Plotting is done using python library matplotlib.
+The plotting program is called plotter.py. plotter.py expectes input format in .csv that has 7 columns, the first one has the values that will be plotted on the x-axis. The first row is expected to have the titles of each colum, with the column titles are expected to be as follows: <x_col_title>,A,B,C,D,E,F.
+
+     ./plotter/plotter.py  <exp_number> <file_name> <x_col_title>(optional)
 
 - _<exp_number>_ is the number of the experiment(expects 1 or 2 only). If _<exp_number>_ is 1, the column that has the x-axis values will be expected to have the title "line sizes," otherwise, it should have the title "ways."
 
 - _<file_name>_ is the **.csv** file that has the experiment data.
 - _<x_col_title>_ is an optional parameter to explicitly specify the title of the column the has the x-axis values. If _<x_col_title>_ is given, _<exp_number>_ is ignored.
-
-## Plotter
 
 ## Implementation Details
 
