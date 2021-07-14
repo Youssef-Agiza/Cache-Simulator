@@ -8,37 +8,56 @@ void HandleInput()
 	void (*expFunctions[])(ReplacementPolicy) = {Exp1, Exp2};
 	//calculauting the number of functions in the array
 	uint32_t numOfFunctions = sizeof(expFunctions) / sizeof(void (*)(ReplacementPolicy));
+	//Taking the user input to decide which experiement to be excuted and graphed
 	while (answer == "")
 	{
-		std::cout << "Enter the experiment number\n";
-		std::cout << "Experiment #1: measuring and graphing the hit ratios for each line size\n";
-		std::cout << "Experiment #2: measuring and graphing the hit ratios for different number of ways\n";
-		std::cout << "Enter one digit indicating the required experiment number (1 or 2)\n";
+		std::cout << "Enter the a valid request number\n";
+		std::cout << "1-Experiment #1: measuring and graphing the hit ratios for each line size\n";
+		std::cout << "2-Experiment #2: measuring and graphing the hit ratios for different number of ways\n";
+		std::cout << "3-Test #a\n"; //Testing..
+		std::cout << "4-Test #b\n"; //Testing..
+		std::cout << "5-Test #c\n"; //Testing..
+		std::cout << "6-Test #d\n"; //Testing replacement for 1-way SetAssociativeCache (direct cache behaviour) 
+		std::cout << "Enter one digit indicating the required experiment number (1 or 2), or a test number (3 (#a), 4 (#b), 5 (#c), or 6 (#d))\n";
 		std::cin >> answer;
 
-		if (!isdigit(answer[0]) || answer[0] > (numOfFunctions + '0'))
+		if (!isdigit(answer[0]) || answer[0] > (numOfFunctions + '0' + '4'))
 		{
 			answer = "";
 			continue;
 		}
 		int32_t expNumber = answer[0] - '0' - 1;
-		ReplacementPolicy policy = ReplacementPolicy::Random;
-		answer = "";
-		while (answer == "")
+		
+		//Calling the correct experiment function
+		if(answer == "1" || answer == "2")
+		for (int i = 0; i < 3; i++)
 		{
-			std::cout << "Enter the replacement policy you want the test to work with:\n";
-			std::cout << "1- Random\n2- LFU (Least Frequently Used)\n3- LRU (Least Recently Used)\n";
-			std::cin >> answer;
-			if (!isdigit(answer[0]) || answer[0] > '3')
+			expFunctions[expNumber](ReplacementPolicy(i));
+		}
+		else
+		{
+			switch (stoi(answer))
 			{
-				std::cout << "Entered Wrong value\n";
+			case 3:
+				Test1();
+				break;
+			case 4:
+				Test2();
+				break;
+			case 5:
+				Test3();
+				break;
+			case 6:
+				Test4();
+				break;
+			default:
 				answer = "";
+				std::cout << "Test number not recognized\n";
 				continue;
+				break;
 			}
 		}
-		policy = (ReplacementPolicy)(answer[0] - '0' - 1);
-		//Calling the correct experiment function
-		expFunctions[expNumber](policy);
+		
 		// switch (expNumber)
 		// {
 		// case 1:
@@ -54,7 +73,8 @@ void HandleInput()
 		// }
 	}
 }
-
+//A function to excute different parts of first experiment
+//Takes the replacement policy for the cache as a parameter
 void Exp1(ReplacementPolicy policy)
 {
 	ExecuteExp(16, 1, 1, policy);
@@ -80,20 +100,37 @@ void Exp2(ReplacementPolicy policy)
 	std::cout << "\nSaved Exp2\n";
 }
 
+
+
+//A function to excute different parts of experiments 1 and 2
+//Takes the line size, ways, and replacementpolicy of the n-way associative cache, also takes the experiment number in which the cache is being excuted.
 void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 {
+	//Declaring 6 n-way associative caches to test the different 6 random addresses generators functions
 	SetAssociativeCache *caches[6];
-	unsigned int hits[6];
-	double hitRatio[6];
-	for (uint32_t i = 0; i < 6; i++)
-	{
-		caches[i] = new SetAssociativeCache(ways, lineSize, policy, CACHE_SIZE);
-		hits[i] = 0;
-		hitRatio[i] = 0.0;
-	}
 
+	//An array to hold the number of hits of each random addresses generator function for that cache
+	unsigned int hits[6];
+
+	//An array to hold the final ratio of hits of each random addresses generator function for that cache
+	double hitRatio[6];
+
+	initalizeVariables(caches, hits, hitRatio, ways, lineSize, policy);
+
+	getHitRatio(hitRatio, caches, hits);
+
+	//Calling a function to save the results in CSV files
+	SaveFiles(hitRatio, lineSize, ways, expNumber, policy);
+
+	freePointers(caches);
+}
+
+//A function to get the hitRatio for each cache
+void getHitRatio(double hitRatio[], SetAssociativeCache* caches[], unsigned int hits[])
+{
 	Random randGen1;
 	Random randGen2;
+	//Looping the required number of iterations times to get an address from each memory generator and test it on the cache (whether it is a hit or a miss)
 	for (uint32_t i = 0; i < NO_OF_Iterations; i++)
 		for (uint32_t j = 0; j < 6; j++)
 		{
@@ -101,14 +138,30 @@ void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 			if (caches[j]->TestCache(address) == HIT)
 				hits[j]++;
 		}
+	//Calculating the hit ratio for each of the 6 caches
 	for (int i = 0; i < 6; i++)
 		hitRatio[i] = (100.0 * (double)(hits[i]) / (double)NO_OF_Iterations);
+}
 
-	SaveFiles(hitRatio, lineSize, ways, expNumber, policy);
+//A function to initalize the values for the caches, and the number of hits and the hitRatios
+void initalizeVariables(SetAssociativeCache* caches[], unsigned int hits[], double hitRatio[], int ways, int lineSize, ReplacementPolicy policy)
+{
+	for (uint32_t i = 0; i < 6; i++)
+	{
+		caches[i] = new SetAssociativeCache(ways, lineSize, policy, CACHE_SIZE);
+		hits[i] = 0;
+		hitRatio[i] = 0.0;
+	}
+}
+
+//A function to free the pointers.
+void freePointers(SetAssociativeCache* caches[])
+{
 	for (uint32_t i = 0; i < 6; i++)
 		delete caches[i];
 }
 
+//A function to output the results of each experiment in their proper CSV (comma seperated) files 
 void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
 {
 	std::ofstream outFile("outputs/Exp#" + std::to_string(expNumber) + "_" + ((expNumber == 1) ? std::to_string(ways) : "32") + "ways_" + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
@@ -119,6 +172,8 @@ void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, Replace
 	outFile.close();
 }
 
+//A function to get an address from the different random addresses generator functions
+//Takes the index of the required memGen function to operate on, and 2 different random generators (because of the different random seeds in memGen A and D)
 unsigned int GetAddress(int j, Random &randGen1, Random &randGen2)
 {
 	switch (j)
@@ -142,6 +197,7 @@ unsigned int GetAddress(int j, Random &randGen1, Random &randGen2)
 	return 0;
 }
 
+//A function to handle exception and exit the program
 void error(void)
 {
 	std::cout << "Exception handled while getting address.\n";
@@ -150,6 +206,7 @@ void error(void)
 }
 
 /************************Tests*********************************/
+
 
 void Test1()
 {
@@ -210,6 +267,39 @@ void Test2()
 		if (cache.TestCache(pattern[i]))
 			hitNumber++;
 	}
+
+	std::cout << (100.0 * hitNumber / size);
+	delete[] pattern;
+}
+
+void Test3()
+{
+	uint32_t size;
+	uint32_t* pattern = GetPatternA(size);
+	SetAssociativeCache cache(4, 8, ReplacementPolicy::LRU, 1024);
+	uint32_t hitNumber = 0;
+	for (uint32_t i = 0; i < size; i++)
+	{
+		if (cache.TestCache(pattern[i]))
+			hitNumber++;
+	}
+
+	std::cout << (100.0 * hitNumber / size);
+	delete[] pattern;
+}
+
+void Test4()
+{
+	uint32_t size;
+	uint32_t* pattern = GetPatternC(size);
+	SetAssociativeCache cache(1, 4, ReplacementPolicy::LRU, 128);
+	uint32_t hitNumber = 0;
+	for (uint32_t i = 0; i < size; i++)
+	{
+		if (cache.TestCache(pattern[i]))
+			hitNumber++;
+	}
+
 	std::cout << (100.0 * hitNumber / size);
 	delete[] pattern;
 }
@@ -235,13 +325,29 @@ uint32_t *GetPatternB(uint32_t &size)
 	uint32_t *array = new uint32_t[size];
 	uint32_t startingValue = 0b00100;
 	for (uint32_t i = 0; i < size; i++)
-		array[i] = (i << 11) | startingValue;
+		array[i] = (i << 5) | startingValue;
 	return array;
 }
 
+//Testing replacement for 1-way SetAssociativeCache (direct cache behaviour) 
+//Expected HIT rate = 0
 uint32_t *GetPatternC(uint32_t &size)
 {
-	size = 10000;
-	uint32_t *array = new uint32_t[size];
+	size = 16;
+	uint32_t* array = new uint32_t[size];
+	array[0] = 2;
+	
+	for (uint32_t i = 1; i < size; i++)
+	{
+		//2 = 0b00000010 
+		//130 = 0b10000010
+		//Same set but different TAG
+		if (array[i-1] == 2)
+			array[i] = 130;
+		else
+			array[i] = 2;
+		
+	}
 	return array;
 }
+
