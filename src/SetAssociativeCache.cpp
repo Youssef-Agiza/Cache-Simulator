@@ -41,8 +41,8 @@ void SetAssociativeCache::InitalizeSets(unsigned int lineSize)
     m_Sets = new Set[m_NumberOfSets];
     for (uint32_t i = 0; i < m_NumberOfSets; i++)
     {
-        m_Sets[i].tags = new unsigned int[m_NumberOfWays];        // in words
-        m_Sets[i].validBits = new unsigned short[m_NumberOfWays]; // in words
+        m_Sets[i].tags = new unsigned int[m_NumberOfWays];
+        m_Sets[i].validBits = new unsigned short[m_NumberOfWays];
         m_Sets[i].frequency = new unsigned int[m_NumberOfWays];
         m_Sets[i].leastUsed = new unsigned int[m_NumberOfWays];
         for (int j = 0; j < m_NumberOfWays; j++)
@@ -59,9 +59,10 @@ inline uint32_t SetAssociativeCache::GetTag(uint32_t address)
 {
     return address >> (m_NumberOfIndexBits + m_NumberOfOffsetBits);
 }
+
 inline uint32_t SetAssociativeCache::GetSetIndex(uint32_t address)
 {
-    uint32_t mask = 0xFFFFFFFF >> (32 - m_NumberOfIndexBits);
+    uint32_t mask = 0xFFFFFFFF >> (32 - m_NumberOfIndexBits); //mask with 1's equal to the number of index bits
     return ((address >> m_NumberOfOffsetBits) & mask);
 }
 
@@ -78,9 +79,11 @@ bool SetAssociativeCache::IsInSet(unsigned int address)
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (set.validBits[i] == VALID && set.tags[i] == tag)
         {
+            //increase the frequency of line being accessed
             set.frequency[i]++;
             for (int j = 0; j < m_NumberOfWays; j++)
                 if (i != j)
+                    //increase least used for the other blocks in the set(read the comments for LeastRecentlyUsed function)
                     set.leastUsed[j]++;
 
             set.leastUsed[i] = 0; //reset current access index least used value
@@ -123,9 +126,13 @@ void SetAssociativeCache::UpdateSet(unsigned int address)
 
 uint32_t SetAssociativeCache::FindLeastFrequent(uint32_t setNumber)
 {
-    uint32_t leastIndex = 0;
     Set &currentSet = m_Sets[setNumber];
+
+    //loop over all the blocks in the set chosen and
+    //... find the one with the least frequency to
+    //replace it
     uint32_t least = currentSet.frequency[0];
+    uint32_t leastIndex = 0;
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
         if (currentSet.frequency[i] < least)
         {
@@ -136,16 +143,20 @@ uint32_t SetAssociativeCache::FindLeastFrequent(uint32_t setNumber)
 }
 uint32_t SetAssociativeCache::FindLeastRecentlyUsed(uint32_t setNumber)
 {
-    uint32_t most = m_Sets[setNumber].leastUsed[0];
+    Set &currentSet = m_Sets[setNumber];
+
+    uint32_t most = currentSet.leastUsed[0];
     uint32_t index = 0;
+
+    //loop over all the blocks in the chosen set and
+    //... find the one with largest "leastUsed"  value
+    // i.e. the block which was least recently accessed
     for (uint32_t i = 0; i < m_NumberOfWays; i++)
-    {
-        if (m_Sets[setNumber].leastUsed[i] > most)
+        if (currentSet.leastUsed[i] > most)
         {
-            most = m_Sets[setNumber].leastUsed[i];
+            most = currentSet.leastUsed[i];
             index = i;
         }
-    }
     return index;
 }
 uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
@@ -161,17 +172,23 @@ uint32_t SetAssociativeCache::FindNextReplacemntIndex(uint32_t setNumber)
     case ReplacementPolicy::LFU:
     {
         replacementIndex = FindLeastFrequent(setNumber);
+        //reset the frequency of the line that will be replaced to 1(since it accessed only 1 time now)
         m_Sets[setNumber].frequency[replacementIndex] = 1;
         break;
     }
     case ReplacementPolicy::LRU:
     {
         replacementIndex = FindLeastRecentlyUsed(setNumber);
+
+        /*
+        increase leastUsed for all the lines in the set except the one we just replaced
+        because they weren't used in this memory access (i.e. there weren't "recently used" in this access)
+        */
         for (int j = 0; j < m_NumberOfWays; j++)
-        {
             if (replacementIndex != j)
                 m_Sets[setNumber].leastUsed[j]++;
-        }
+
+        //reset lesatUsed for the line being accessed to 0, which means it is the most recently used line
         m_Sets[setNumber].leastUsed[replacementIndex] = 0;
         break;
     }

@@ -41,8 +41,8 @@ private:
     {
         unsigned short *validBits;
         unsigned int *tags;
-        unsigned int *frequency;
-        unsigned int *leastUsed;
+        unsigned int *frequency; //to keep track of the frequency each line is accessed.
+        unsigned int *leastUsed; //to keep track of least recently used block and replace it.
     };
 
     /*returns true if the address if HIT, false if MISS*/
@@ -67,9 +67,13 @@ private:
     //precondition: cacheSize is given, m_NumberOfWays and m_NumberOfSets are initalized correctly
     void InitializeBitNumbers(uint32_t cacheSize);
 
-    /*Replacement Policy helpers*/
-    uint32_t FindLeastFrequent(uint32_t setNumber);
+    //check the chosen policy and returns the index of the line to be replaced accordingly
     uint32_t FindNextReplacemntIndex(uint32_t setNumber);
+
+    /*Replacement Policy helpers*/
+    //returns the index of the least frequently used block in the set
+    uint32_t FindLeastFrequent(uint32_t setNumber);
+    //returns the index of the least recently used block in the set
     uint32_t FindLeastRecentlyUsed(uint32_t setNumber);
 
 #if defined(NORM_DEBUG) || defined(EXTREME_DEBUG)
