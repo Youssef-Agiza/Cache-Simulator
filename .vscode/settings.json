@@ -64,5 +64,6 @@
     "string_view": "cpp",
     "sstream": "cpp",
     "bitset": "cpp"
-  }
+  },
+  "python.defaultInterpreterPath": "usr/bin/python3"
 }

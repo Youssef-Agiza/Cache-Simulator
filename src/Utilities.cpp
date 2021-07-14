@@ -111,10 +111,10 @@ void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 
 void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
 {
-	std::ofstream outFile("Outputs/Exp#" + std::to_string(expNumber) + " & " + ((expNumber == 1) ? std::to_string(ways) : "32") + " ways - " + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
+	std::ofstream outFile("outputs/Exp#" + std::to_string(expNumber) + "_" + ((expNumber == 1) ? std::to_string(ways) : "32") + "ways_" + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
 	int length = outFile.tellp();
 	if (length == 0)
-		outFile << ",A,B,C,D,E,F\n";
+		outFile << ((expNumber == 1) ? "line sizes" : "ways") << ",A,B,C,D,E,F\n";
 	outFile << ((expNumber == 1) ? lineSize : ways) << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
 	outFile.close();
 }
