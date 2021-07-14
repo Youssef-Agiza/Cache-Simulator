@@ -2,9 +2,9 @@
 
 int main()
 {
-    //HandleInput();
+    HandleInput();
     //Test1();
-    Test2();
+    //Test2();
     // system("python3 plotter/plotter.py");
     return 0;
 }

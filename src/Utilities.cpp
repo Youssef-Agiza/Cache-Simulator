@@ -203,19 +203,12 @@ void Test2()
 {
 	uint32_t size;
 	uint32_t *pattern = GetPatternB(size);
-	SetAssociativeCache cache(4, 4, ReplacementPolicy::LRU);
+	SetAssociativeCache cache(4, 8, ReplacementPolicy::LRU, 128);
 	uint32_t hitNumber = 0;
 	for (uint32_t i = 0; i < size; i++)
 	{
 		if (cache.TestCache(pattern[i]))
-		{
 			hitNumber++;
-			std::cout << "<== HIT\n";
-		}
-		else
-		{
-			std::cout << "==> MISS\n";
-		}
 	}
 	std::cout << (100.0 * hitNumber / size);
 	delete[] pattern;
@@ -223,7 +216,7 @@ void Test2()
 
 uint32_t *GetPatternA(uint32_t &size)
 {
-	size = 10000;
+	size = 100;
 	uint32_t *array = new uint32_t[size];
 	for (uint32_t i = 0; i < size; i++)
 	{
@@ -232,19 +225,20 @@ uint32_t *GetPatternA(uint32_t &size)
 	return array;
 }
 
+//To test Cache ways
+//8 bytes line
+//4-way set associative
+//128B CacheSize
 uint32_t *GetPatternB(uint32_t &size)
 {
-	//4 bytes line
-	//4-way set associative
-
 	size = 10;
 	uint32_t *array = new uint32_t[size];
+	uint32_t startingValue = 0b00100;
 	for (uint32_t i = 0; i < size; i++)
-	{
-		array[i] = i * 4;
-	}
+		array[i] = (i << 11) | startingValue;
 	return array;
 }
+
 uint32_t *GetPatternC(uint32_t &size)
 {
 	size = 10000;
