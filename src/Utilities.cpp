@@ -4,8 +4,9 @@
 void HandleInput()
 {
 	std::string answer = "";
-	//Function pointer array that contains pointers to the different experiments that can be made
+	//Function pointer array that contains pointers to the different experiments/tests that can be made
 	void (*expFunctions[])(ReplacementPolicy) = {Exp1, Exp2};
+	void (*testFunctions[])() = {TestA, TestB, TestC, TestD};
 	//calculauting the number of functions in the array
 	uint32_t numOfFunctions = sizeof(expFunctions) / sizeof(void (*)(ReplacementPolicy));
 	//Taking the user input to decide which experiement to be excuted and graphed
@@ -14,10 +15,10 @@ void HandleInput()
 		std::cout << "Enter the a valid request number\n";
 		std::cout << "1-Experiment #1: measuring and graphing the hit ratios for each line size\n";
 		std::cout << "2-Experiment #2: measuring and graphing the hit ratios for different number of ways\n";
-		std::cout << "3-Test #a\n"; //Testing..
-		std::cout << "4-Test #b\n"; //Testing..
-		std::cout << "5-Test #c\n"; //Testing..
-		std::cout << "6-Test #d\n"; //Testing replacement for 1-way SetAssociativeCache (direct cache behaviour) 
+		std::cout << "3-Test #a\n";
+		std::cout << "4-Test #b\n";
+		std::cout << "5-Test #c\n";
+		std::cout << "6-Test #d\n";
 		std::cout << "Enter one digit indicating the required experiment number (1 or 2), or a test number (3 (#a), 4 (#b), 5 (#c), or 6 (#d))\n";
 		std::cin >> answer;
 
@@ -27,50 +28,13 @@ void HandleInput()
 			continue;
 		}
 		int32_t expNumber = answer[0] - '0' - 1;
-		
+
 		//Calling the correct experiment function
-		if(answer == "1" || answer == "2")
-		for (int i = 0; i < 3; i++)
-		{
-			expFunctions[expNumber](ReplacementPolicy(i));
-		}
+		if (answer == "1" || answer == "2")
+			for (int i = 0; i < 3; i++)
+				expFunctions[expNumber](ReplacementPolicy(i));
 		else
-		{
-			switch (stoi(answer))
-			{
-			case 3:
-				Test1();
-				break;
-			case 4:
-				Test2();
-				break;
-			case 5:
-				Test3();
-				break;
-			case 6:
-				Test4();
-				break;
-			default:
-				answer = "";
-				std::cout << "Test number not recognized\n";
-				continue;
-				break;
-			}
-		}
-		
-		// switch (expNumber)
-		// {
-		// case 1:
-		// 	Exp1(policy);
-		// 	break;
-		// case 2:
-		// 	Exp2(policy);
-		// 	break;
-		// default:
-		// 	std::cout << "Invalid input!\n";
-		// 	answer = "";
-		// 	break;
-		// }
+			testFunctions[expNumber - 3]();
 	}
 }
 //A function to excute different parts of first experiment
@@ -100,8 +64,6 @@ void Exp2(ReplacementPolicy policy)
 	std::cout << "\nSaved Exp2\n";
 }
 
-
-
 //A function to excute different parts of experiments 1 and 2
 //Takes the line size, ways, and replacementpolicy of the n-way associative cache, also takes the experiment number in which the cache is being excuted.
 void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
@@ -126,7 +88,7 @@ void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 }
 
 //A function to get the hitRatio for each cache
-void getHitRatio(double hitRatio[], SetAssociativeCache* caches[], unsigned int hits[])
+void getHitRatio(double hitRatio[], SetAssociativeCache *caches[], unsigned int hits[])
 {
 	Random randGen1;
 	Random randGen2;
@@ -144,7 +106,7 @@ void getHitRatio(double hitRatio[], SetAssociativeCache* caches[], unsigned int 
 }
 
 //A function to initalize the values for the caches, and the number of hits and the hitRatios
-void initalizeVariables(SetAssociativeCache* caches[], unsigned int hits[], double hitRatio[], int ways, int lineSize, ReplacementPolicy policy)
+void initalizeVariables(SetAssociativeCache *caches[], unsigned int hits[], double hitRatio[], int ways, int lineSize, ReplacementPolicy policy)
 {
 	for (uint32_t i = 0; i < 6; i++)
 	{
@@ -155,13 +117,13 @@ void initalizeVariables(SetAssociativeCache* caches[], unsigned int hits[], doub
 }
 
 //A function to free the pointers.
-void freePointers(SetAssociativeCache* caches[])
+void freePointers(SetAssociativeCache *caches[])
 {
 	for (uint32_t i = 0; i < 6; i++)
 		delete caches[i];
 }
 
-//A function to output the results of each experiment in their proper CSV (comma seperated) files 
+//A function to output the results of each experiment in their proper CSV (comma seperated) files
 void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
 {
 	std::ofstream outFile("outputs/Exp#" + std::to_string(expNumber) + "_" + ((expNumber == 1) ? std::to_string(ways) : "32") + "ways_" + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
@@ -207,8 +169,7 @@ void error(void)
 
 /************************Tests*********************************/
 
-
-void Test1()
+void TestA()
 {
 	int answer;
 	std::cout << "Replacement policy:\n1-random\n2-LFU\n3-LRU\n";
@@ -256,7 +217,7 @@ there:
 	std::cout << "End of the simulation\n";
 }
 
-void Test2()
+void TestB()
 {
 	uint32_t size;
 	uint32_t *pattern = GetPatternB(size);
@@ -272,10 +233,10 @@ void Test2()
 	delete[] pattern;
 }
 
-void Test3()
+void TestC()
 {
 	uint32_t size;
-	uint32_t* pattern = GetPatternA(size);
+	uint32_t *pattern = GetPatternA(size);
 	SetAssociativeCache cache(4, 8, ReplacementPolicy::LRU, 1024);
 	uint32_t hitNumber = 0;
 	for (uint32_t i = 0; i < size; i++)
@@ -288,10 +249,10 @@ void Test3()
 	delete[] pattern;
 }
 
-void Test4()
+void TestD()
 {
 	uint32_t size;
-	uint32_t* pattern = GetPatternC(size);
+	uint32_t *pattern = GetPatternC(size);
 	SetAssociativeCache cache(1, 4, ReplacementPolicy::LRU, 128);
 	uint32_t hitNumber = 0;
 	for (uint32_t i = 0; i < size; i++)
@@ -329,25 +290,23 @@ uint32_t *GetPatternB(uint32_t &size)
 	return array;
 }
 
-//Testing replacement for 1-way SetAssociativeCache (direct cache behaviour) 
+//Testing replacement for 1-way SetAssociativeCache (direct cache behaviour)
 //Expected HIT rate = 0
 uint32_t *GetPatternC(uint32_t &size)
 {
 	size = 16;
-	uint32_t* array = new uint32_t[size];
+	uint32_t *array = new uint32_t[size];
 	array[0] = 2;
-	
+
 	for (uint32_t i = 1; i < size; i++)
 	{
-		//2 = 0b00000010 
+		//2 = 0b00000010
 		//130 = 0b10000010
 		//Same set but different TAG
-		if (array[i-1] == 2)
+		if (array[i - 1] == 2)
 			array[i] = 130;
 		else
 			array[i] = 2;
-		
 	}
 	return array;
 }
-
