@@ -15,8 +15,8 @@ void Exp2(ReplacementPolicy policy);
 void getHitRatio(double hitRatio[], SetAssociativeCache *caches[], unsigned int hits[]);
 void initalizeVariables(SetAssociativeCache *caches[], unsigned int hits[], double hitRatio[], int ways, int lineSize, ReplacementPolicy policy);
 void freePointers(SetAssociativeCache *caches[]);
-void ExecuteExp(int bytes, int ways, int expNumber, ReplacementPolicy policy);
-void SaveFiles(double hitRatio[], int bytes, int ways, int expNumber, ReplacementPolicy p);
+void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy, std::ofstream &outFile);
+void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p, std::ofstream &outFile);
 unsigned int GetAddress(int j, Random &randGen1, Random &randGen2);
 void error(void);
 

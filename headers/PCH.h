@@ -3,7 +3,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define DEBUG_LEVEL 1
+#define DEBUG_LEVEL 0
 #if (DEBUG_LEVEL == 1)
 #define NORM_DEBUG
 #elif (DEBUG_LEVEL == 2)

@@ -40,32 +40,45 @@ void HandleInput()
 //Takes the replacement policy for the cache as a parameter
 void Exp1(ReplacementPolicy policy)
 {
-	ExecuteExp(16, 1, 1, policy);
-	ExecuteExp(32, 1, 1, policy);
-	ExecuteExp(64, 1, 1, policy);
-	ExecuteExp(128, 1, 1, policy);
-	std::cout << "\nSaved Part1 in ./Outputs/\n";
-	ExecuteExp(16, 8, 1, policy);
-	ExecuteExp(32, 8, 1, policy);
-	ExecuteExp(64, 8, 1, policy);
-	ExecuteExp(128, 8, 1, policy);
-	std::cout << "\nSaved Part2 in ./Outputs/";
+	{
+		std::ofstream outFile("outputs/Exp#1_1ways_" + g_RepPoliciesStrings[(int)policy] + ".csv");
+		outFile << "line sizes,A,B,C,D,E,F\n";
+		ExecuteExp(16, 1, 1, policy, outFile);
+		ExecuteExp(32, 1, 1, policy, outFile);
+		ExecuteExp(64, 1, 1, policy, outFile);
+		ExecuteExp(128, 1, 1, policy, outFile);
+		outFile.close();
+		std::cout << "\nSaved Part1 in ./Outputs/\n";
+	}
+	{
+		std::ofstream outFile("outputs/Exp#1_8ways_" + g_RepPoliciesStrings[(int)policy] + ".csv");
+		outFile << "line sizes,A,B,C,D,E,F\n";
+		ExecuteExp(16, 8, 1, policy, outFile);
+		ExecuteExp(32, 8, 1, policy, outFile);
+		ExecuteExp(64, 8, 1, policy, outFile);
+		ExecuteExp(128, 8, 1, policy, outFile);
+		outFile.close();
+		std::cout << "\nSaved Part2 in ./Outputs/";
+	}
 }
 
 void Exp2(ReplacementPolicy policy)
 {
-	ExecuteExp(32, 1, 2, policy);
-	ExecuteExp(32, 2, 2, policy);
-	ExecuteExp(32, 4, 2, policy);
-	ExecuteExp(32, 8, 2, policy);
-	ExecuteExp(32, 16, 2, policy);
-	ExecuteExp(32, 32, 2, policy);
+	std::ofstream outFile("outputs/Exp#2_32ways_" + g_RepPoliciesStrings[(int)policy] + ".csv");
+	outFile << "ways,A,B,C,D,E,F\n";
+	ExecuteExp(32, 1, 2, policy, outFile);
+	ExecuteExp(32, 2, 2, policy, outFile);
+	ExecuteExp(32, 4, 2, policy, outFile);
+	ExecuteExp(32, 8, 2, policy, outFile);
+	ExecuteExp(32, 16, 2, policy, outFile);
+	ExecuteExp(32, 32, 2, policy, outFile);
 	std::cout << "\nSaved Exp2\n";
+	outFile.close();
 }
 
 //A function to excute different parts of experiments 1 and 2
 //Takes the line size, ways, and replacementpolicy of the n-way associative cache, also takes the experiment number in which the cache is being excuted.
-void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
+void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy, std::ofstream &outFile)
 {
 	//Declaring 6 n-way associative caches to test the different 6 random addresses generators functions
 	SetAssociativeCache *caches[6];
@@ -81,7 +94,7 @@ void ExecuteExp(int lineSize, int ways, int expNumber, ReplacementPolicy policy)
 	getHitRatio(hitRatio, caches, hits);
 
 	//Calling a function to save the results in CSV files
-	SaveFiles(hitRatio, lineSize, ways, expNumber, policy);
+	SaveFiles(hitRatio, lineSize, ways, expNumber, policy, outFile);
 
 	freePointers(caches);
 }
@@ -123,14 +136,9 @@ void freePointers(SetAssociativeCache *caches[])
 }
 
 //A function to output the results of each experiment in their proper CSV (comma seperated) files
-void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p)
+void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p, std::ofstream &outFile)
 {
-	std::ofstream outFile("outputs/Exp#" + std::to_string(expNumber) + "_" + ((expNumber == 1) ? std::to_string(ways) : "32") + "ways_" + g_RepPoliciesStrings[(int)p] + ".csv", std::ios::app | std::ios::ate);
-	int length = outFile.tellp();
-	if (length == 0)
-		outFile << ((expNumber == 1) ? "line sizes" : "ways") << ",A,B,C,D,E,F\n";
 	outFile << ((expNumber == 1) ? lineSize : ways) << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
-	outFile.close();
 }
 
 //A function to get an address from the different random addresses generator functions
