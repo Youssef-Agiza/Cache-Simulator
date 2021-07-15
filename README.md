@@ -1,5 +1,5 @@
 # Cache-Simulator
-
+Simiulator to a set associative cache mainly used in order to test cache performance according to the change of different parameters such as cache size, line size, and the number of ways.
 ## Usage guide
 
 1.  clone repo:
@@ -37,10 +37,10 @@ The plotting program is called plotter.py. plotter.py expectes input format in .
 
      ./plotter/plotter.py  <exp_number> <file_name> <x_col_title>(optional)
 
-- _<exp_number>_ is the number of the experiment(expects 1 or 2 only). If _<exp_number>_ is 1, the column that has the x-axis values will be expected to have the title "line sizes," otherwise, it should have the title "ways."
+- `<exp_number>` is the number of the experiment(expects 1 or 2 only). If `<exp_number>` is 1, the column that has the x-axis values will be expected to have the title "line sizes," otherwise, it should have the title "ways."
 
-- _<file_name>_ is the **.csv** file that has the experiment data.
-- _<x_col_title>_ is an optional parameter to explicitly specify the title of the column the has the x-axis values. If _<x_col_title>_ is given, _<exp_number>_ is ignored.
+- `<file_name>` is the **.csv** file that has the experiment data.
+- `<x_col_title>` is an optional parameter to explicitly specify the title of the column the has the x-axis values. If _<x_col_title>_ is given, _<exp_number>_ is ignored.
 
 ## Implementation Details
 
