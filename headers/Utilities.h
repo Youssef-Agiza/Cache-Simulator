@@ -11,6 +11,7 @@ void HandleInput();
 
 void Exp1(ReplacementPolicy policy);
 void Exp2(ReplacementPolicy policy);
+void Exp3(ReplacementPolicy policy);
 
 void getHitRatio(double hitRatio[], SetAssociativeCache *caches[], unsigned int hits[]);
 void initalizeVariables(SetAssociativeCache *caches[], unsigned int hits[], double hitRatio[], int ways, int lineSize, ReplacementPolicy policy);

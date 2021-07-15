@@ -5,7 +5,7 @@ void HandleInput()
 {
 	std::string answer = "";
 	//Function pointer array that contains pointers to the different experiments/tests that can be made
-	void (*expFunctions[])(ReplacementPolicy) = {Exp1, Exp2};
+	void (*expFunctions[])(ReplacementPolicy) = {Exp1, Exp2, Exp3};
 	void (*testFunctions[])() = {TestA, TestB, TestC};
 	//calculauting the number of functions in the array
 	uint32_t numOfFunctions = sizeof(expFunctions) / sizeof(void (*)(ReplacementPolicy));
@@ -15,13 +15,14 @@ void HandleInput()
 		std::cout << "Enter the a valid request number\n";
 		std::cout << "1-Experiment #1: measuring and graphing the hit ratios for each line size\n";
 		std::cout << "2-Experiment #2: measuring and graphing the hit ratios for different number of ways\n";
-		std::cout << "3-Test #A\n";
-		std::cout << "4-Test #B\n";
-		std::cout << "5-Test #C\n";
-		std::cout << "Enter one digit indicating the required experiment number (1 or 2), or a test number (3 (#a), 4 (#b), 5 (#c), or 6 (#d))\n";
+		std::cout << "3-Experiment(EXTRA) #3: measuring and graphing the hit ratios for different number of ways for 256 and 512 line sizes\n";
+		std::cout << "4-Test #A\n";
+		std::cout << "5-Test #B\n";
+		std::cout << "6-Test #C\n";
+		std::cout << "Enter one digit indicating the required experiment number (1, 2, or 3), or a test number (4 (#a), 5 (#b), or 6 (#c))\n";
 		std::cin >> answer;
 
-		if (!isdigit(answer[0]) || answer[0] > '5')
+		if (!isdigit(answer[0]) || answer[0] > '6')
 		{
 			answer = "";
 			continue;
@@ -29,7 +30,7 @@ void HandleInput()
 		int32_t expNumber = answer[0] - '0' - 1;
 
 		//Calling the correct experiment function
-		if (expNumber <= 1)
+		if (expNumber <= 2)
 			for (int i = 0; i < 3; i++)
 				expFunctions[expNumber](ReplacementPolicy(i));
 		else
@@ -74,6 +75,31 @@ void Exp2(ReplacementPolicy policy)
 	ExecuteExp(32, 32, 2, policy, outFile);
 	std::cout << "\nSaved Exp2\n";
 	outFile.close();
+}
+
+void Exp3(ReplacementPolicy policy)
+{
+	std::ofstream outFile1("outputs/Exp#3_256" + g_RepPoliciesStrings[(int)policy] + ".csv");
+	outFile1 << "ways,A,B,C,D,E,F\n";
+	ExecuteExp(256, 1, 3, policy, outFile1);
+	ExecuteExp(256, 2, 3, policy, outFile1);
+	ExecuteExp(256, 4, 3, policy, outFile1);
+	ExecuteExp(256, 8, 3, policy, outFile1);
+	ExecuteExp(256, 16, 3, policy, outFile1);
+	ExecuteExp(256, 32, 3, policy, outFile1);
+	outFile1.close();
+	std::cout << "\nSaved Exp3.1\n";
+
+	std::ofstream outFile2("outputs/Exp#3_512" + g_RepPoliciesStrings[(int)policy] + ".csv");
+	outFile2 << "ways,A,B,C,D,E,F\n";
+	ExecuteExp(512, 1, 3, policy, outFile2);
+	ExecuteExp(512, 2, 3, policy, outFile2);
+	ExecuteExp(512, 4, 3, policy, outFile2);			   
+	ExecuteExp(512, 8, 3, policy, outFile2);
+	ExecuteExp(512, 16,3, policy, outFile2);
+	ExecuteExp(512, 32,3, policy, outFile2);
+	std::cout << "\nSaved Exp3.2\n";
+	outFile2.close();
 }
 
 //A function to excute different parts of experiments 1 and 2
@@ -138,7 +164,20 @@ void freePointers(SetAssociativeCache *caches[])
 //A function to output the results of each experiment in their proper CSV (comma seperated) files
 void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, ReplacementPolicy p, std::ofstream &outFile)
 {
-	outFile << ((expNumber == 1) ? lineSize : ways) << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+	switch (expNumber)
+	{
+	case 1:
+		outFile << lineSize  << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+		break;
+	case 2:
+		outFile << ways << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+		break;
+	case 3:
+		outFile << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+	default:
+		break;
+	}
+	
 }
 
 //A function to get an address from the different random addresses generator functions

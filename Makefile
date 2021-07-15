@@ -32,6 +32,9 @@ plotOutputs:
 	for file in ./outputs/Exp#2*; do \
 		python3 plotter/plotter.py 2 $$file;\
 	done
+	for file in ./outputs/Exp#3*; do \
+		python3 plotter/plotter.py 3 $$file;\
+	done
 
 outputDir:
 		mkdir -p outputs plots
