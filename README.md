@@ -59,3 +59,48 @@ The plotting program is called plotter.py. plotter.py expectes input format in .
 1. Code optimization
 
    In this project we didn't focus mainly on optimizing the code but rather on simulating the caching proccess correctly. Thus, some code parts are not optimized, some variables are allocated even if they are not needed, some loops are written explicitly more than ones instead of encapsulating them in a function. This can be further optimized but it would an overkill for this project so we prefered to keep it simple.
+
+## Contributions: 
+* [Seif Sallam](seif_sallam@aucegypt.edu): Base skeleton of our design, a lot of code refactoring, and wrote a test case.
+  * Functions & Methods:
+    * Random Class (entirely) - encapsulation of existing code
+    * SetAssociativeCache class:
+        * Constructor
+        * TestCache
+        * IsInSet
+        * UpdateSet
+        * FindReplacmentIndex
+        * FindLeastFrequent
+        * Find RecentlyUsed
+    * Utilities:
+        * GetPatternB
+        * TestB
+        * TestC
+* [Youssef Agiza](youssefagiza@aucegypt.edu): Implementation of SetAssocitave cache class, code refactoring, collaborated on implementing and debugging the test cases and the replacement policies. Also implemented the plotter in python.
+  * Set Associative Cache Class methods:
+    * InitalizeSets
+    * GetTag
+    * GetSetIndex
+    * InitalizeBitNumbers
+    * IsInSet
+    * UpdateSet
+    * Debugging Loggers: LogSetInfo, LogCacheInfo, LogUpdateInfo
+  * Utility functions
+    * TestC
+    * Makefile
+  * plotter.py
+
+- [Kareem Amr](kareemamr213@aucegypt.edu): Handling the user input, code refactoring, implementation of the experiment and the test cases.
+  * Functions & methods:
+    * GetPatternA
+    * TestA
+    * Experiment #1, #2, and #3
+    * Handling user input
+    * Saving the output into CSV files
+  * Utility functions such as:
+    * GetAddress
+    * ExecuteExp
+    * GetHitRatio
+    * InitalizeVariables
+    * freePointers
+    * SaveFiles
