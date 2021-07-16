@@ -94,10 +94,10 @@ void Exp3(ReplacementPolicy policy)
 	outFile2 << "ways,A,B,C,D,E,F\n";
 	ExecuteExp(512, 1, 3, policy, outFile2);
 	ExecuteExp(512, 2, 3, policy, outFile2);
-	ExecuteExp(512, 4, 3, policy, outFile2);			   
+	ExecuteExp(512, 4, 3, policy, outFile2);
 	ExecuteExp(512, 8, 3, policy, outFile2);
-	ExecuteExp(512, 16,3, policy, outFile2);
-	ExecuteExp(512, 32,3, policy, outFile2);
+	ExecuteExp(512, 16, 3, policy, outFile2);
+	ExecuteExp(512, 32, 3, policy, outFile2);
 	std::cout << "\nSaved Exp3.2\n";
 	outFile2.close();
 }
@@ -167,17 +167,16 @@ void SaveFiles(double hitRatio[], int lineSize, int ways, int expNumber, Replace
 	switch (expNumber)
 	{
 	case 1:
-		outFile << lineSize  << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+		outFile << lineSize << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
 		break;
 	case 2:
 		outFile << ways << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
 		break;
 	case 3:
-		outFile << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
+		outFile << ways << "," << hitRatio[0] << "," << hitRatio[1] << "," << hitRatio[2] << "," << hitRatio[3] << "," << hitRatio[4] << "," << hitRatio[5] << std::endl;
 	default:
 		break;
 	}
-	
 }
 
 //A function to get an address from the different random addresses generator functions
